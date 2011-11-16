@@ -1,0 +1,20 @@
+
+
+
+
+Variable Visibility
+============================================================================================================
+
+* (truly) global
+
+* quasi-global ('globalocalized')
+
+* public
+
+* private
+
+* hidden
+
+* injected (similar to Perl's ``local`` keyword)
+
+
