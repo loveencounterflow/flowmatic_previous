@@ -8,7 +8,7 @@ The Mythical Next Beast.
 TL;DR
 ============================================================================================================
 
-This document is mainly here to instill the illusion of meaningful content. Today i managed to reactivate my GitHub account, only to plunge into a session of thought-oozing, the output of which fills the ret of this page. I hope it is not before long that i will be able to post working code to this site, as basic parsing is already working quite well. Y'know, this beast is gonna have, like, inheritable, modularized grammars, using, like, traits, slash, mixins—? Which put me two weeks or so to implement (hopefully) correctly. The result of that work is dubbed multimix_. Don't be afraid, it won't bite, and is actually an extremely useful, simplistic but feature-complete (i believe) approach to inheritance the painless way.
+This document is mainly here to instill the illusion of meaningful content. Today i managed to reactivate my GitHub account, only to plunge into a session of thought-oozing, the output of which fills the rest of this page. I hope it is not before long that i will be able to post working code to this site, as basic parsing is already working quite well. Y'know, this beast is gonna have, like, inheritable, modularized grammars, using, like, traits, slash, mixins—? Which took me close to two weeks or so to implement (hopefully) correctly. The result of that work is dubbed multimix_. Don't be afraid, it won't bite, and is actually an extremely useful, simplistic yet feature-complete (i believe) approach to, like, inheritance the painless way, anyone?
 
 ..	_multimix: https://github.com/loveencounterflow/multimix
 
