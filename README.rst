@@ -11,9 +11,9 @@ Like SillyPutty, but not as brittle. Like Perl, but less cryptic. Like Python, b
 FTW!
 ============================================================================================================
 
-So i was looking for a language and, Lo!, there was JavaScript, back in 1999. After dealing with one linguistic atrocity too much, however, i was quick to dump it, having just discovered Python, then the new kid on the block, which—after Basic, Assembler, Forth, VisualBasic, C (i believe i did manage to print out 'Helo World' back then, but not sure), Java (still traumatized by that one), and $@#%Perl—seemed like a *sane* thing to do.
+So i was looking for my next favorite programming language in 1999 and, Lo!, there was JavaScript. After dealing with one linguistic atrocity too much, however, i was quick to dump it, having just discovered Python (then the new slash kewl kid on the block), which—after Basic, Assembler, Forth, VisualBasic, C (never beyond 'Helo World', tho), Java (still traumatized by that one), and **$@#%** Perl—seemed like a *sane* thing to do for a change.
 
-I spent the decade of 2k00 writing Python—quite to the exclusion of other options, while still hunting the mythical next beast.
+I spent the decade of 2k00 writing my programs in Python—quite to the exclusion of other options, while still hunting the mythical next beast. I immediately fell in love with significant whitespace and dived into classical object-oriented programming (which, be it said, is better done and easier to grasp in Python than in *any* other language i'm aware of).
 
 
 
