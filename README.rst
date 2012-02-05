@@ -2,10 +2,8 @@
 
 .. image:: https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png
    :align: left
+   :width: 300px
 
-.. raw:: html
-
-   <hr width=50 size=10>
 
 
 WTF?
