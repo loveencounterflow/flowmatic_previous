@@ -1,4 +1,8 @@
 
+
+.. image:: https://github.com/smarr/RoarVM/raw/1591bb4e1c282f418231da77cf6d09ec31e2abe8/misc/RoarVM-logo-full.jpg
+   :align: left
+
 .. raw:: html
 
    <hr width=50 size=10>
