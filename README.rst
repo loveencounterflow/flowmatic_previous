@@ -2,14 +2,15 @@
 
 .. image:: https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png
    :align: left
-   :width: 300px
+   :scale: 30%
 
 
 
 WTF?
 ============================================================================================================
 
-Like SillyPutty, but not as brittle. Like Perl, but less cryptic. Like Python, but sans the Batteries, and less braces. Or, like, braces all over the place, if it's that what you want. Like CoffeeScript, but with a sound dose of identity crisis. Like Brainfuck, but completely different. An exploratorium for programming language lovers. Touch it the right way, and enjoy the purr. Touch it the wrong way and watch as it bites back and crashes. Awesome.
+Like SillyPutty, but not as brittle. Like Perl, but less cryptic. Like Python, but sans the Batteries, and less braces. Or, like, braces all over the place, if it's that what you want. Like CoffeeScript, but with a sound dose of identity crisis. Like Brainfuck, but completely different. An exploratorium for programming language lovers. Touch it the right way and enjoy the purr. Touch it the wrong way and watch it bitching and crashing. Awesome.
+
 
 FTW!
 ============================================================================================================
