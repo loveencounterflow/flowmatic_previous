@@ -2,7 +2,7 @@
 
 .. image:: https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png
    :align: left
-   :scale: 30%
+   :scale: 30
 
 
 
