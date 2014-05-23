@@ -29,7 +29,7 @@ Grammars and Symbiotic Programming Languages (that compile to JavaScript). Writt
 ### Dependency Ordering
 
 When `require`ing dependencies from the same grammar, take care to `require flowmatic` *before* any of the
-dependencies. I have no thorogh test cases for this, but it bit me once when i did
+dependencies. I have no thorough test cases for this, but it bit me once when i did
 
 ````coffeescript
 # Don't do this!
@@ -46,7 +46,7 @@ XRE                       = require './9-xre'
 ````
 
 `XRE` happens to be a function, but in the first case, i got an error `Object is not a function`, which is
-indicative of NodeJS still not having resolved a circular import.
+indicative of NodeJS not having resolved a circular import at that point.
 
 ### Previous README
 
