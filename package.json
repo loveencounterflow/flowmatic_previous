@@ -16,7 +16,7 @@
     "url": "https://github.com/loveencounterflow/flowmatic/issues"
   },
   "dependencies": {
-    "coffee-script": "~1.6.3"
+    "coffee-script": "^1.6.3"
   },
   "optionalDependencies": {},
   "larq": {
@@ -30,5 +30,5 @@
   },
   "readmeFilename": "README.md",
   "readme": "ERROR: No README data found!",
-  "_id": "flowmatic@0.0.1"
+  "_id": "flowmatic@0.0.2"
 }
