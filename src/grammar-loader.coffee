@@ -9,6 +9,7 @@
 njs_path                  = require 'path'
 # njs_fs                    = require 'fs'
 #...........................................................................................................
+BNP                       = require 'coffeenode-bitsnpieces'
 TRM                       = require 'coffeenode-trm'
 rpr                       = TRM.rpr.bind TRM
 badge                     = '﴾main﴿'
@@ -42,6 +43,7 @@ GLOB                      = require 'glob'
 #-----------------------------------------------------------------------------------------------------------
 @get_route_infos = ( options = {} ) ->
   ### Get routes for all grammar modules whose name starts with a digit other than 0: ###
+  debug ( require 'coffeenode-options').get_app_info()
   glob    = njs_path.join __dirname, '*'
   R       = ( route for route in GLOB.sync glob )
   matcher = if options[ 'all' ] then /^[0-9]/ else /^[1-9]/
