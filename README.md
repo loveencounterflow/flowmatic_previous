@@ -1,23 +1,22 @@
 
 
-		- [](#)
-- [TL;DR](#tl;dr)
-- [WTF?](#wtf)
-- [FTW!](#ftw!)
-- [What gives?](#what-gives)
+- [FlowMatic](#flowmatic)
+	- [TL;DR](#tl;dr)
+	- [WTF?](#wtf)
+	- [FTW!](#ftw!)
+	- [What gives?](#what-gives)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 
-####
+# FlowMatic
 
 
 ![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png)
 
 The Mythical Next Beast.
 
-TL;DR
-============================================================================================================
+## TL;DR
 
 This document is mainly here to instill the illusion of meaningful content. Today i managed to reactivate my
 GitHub account, only to plunge into a session of thought-oozing, the output of which fills the rest of this
@@ -28,10 +27,9 @@ correctly. The result of that work is dubbed multimix_. Don't be afraid, it won'
 extremely useful, simplistic yet feature-complete (i believe) approach to, like, inheritance the painless
 way, anyone?
 
-..	_multimix: https://github.com/loveencounterflow/multimix
+..  _multimix: https://github.com/loveencounterflow/multimix
 
-WTF?
-============================================================================================================
+## WTF?
 
 Like SillyPutty, but not as brittle. Like Perl, but less cryptic. Like Python, but sans the Batteries, and
 less braces. Or, like, braces all over the place, if it's that what you want. Like CoffeeScript, but with a
@@ -40,8 +38,7 @@ language lovers. Touch it the right way and enjoy the purr. Touch it the wrong w
 crashing. Awesome.
 
 
-FTW!
-============================================================================================================
+## FTW!
 
 So i was looking for my next favorite programming language in 1999 and, *Lo*, there was JavaScript. After
 dealing with one linguistic atrocity too much, however, i was quick to dump it, having just discovered
@@ -81,8 +78,7 @@ stopped to care about Python and set off to rebuild my ≈50k LOC utility belt l
 incarnation) that will power, you guessed it, FlowMatic.
 
 
-What gives?
-============================================================================================================
+## What gives?
 
 Anyone who cares about implementing their own programming language must, need be, answer two core questions:
 **What to implement the virtual machine in**, and **how to parse source**. Let me quickly answer the first
