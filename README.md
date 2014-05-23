@@ -1,6 +1,5 @@
 
 
-- [FlowMatic](#flowmatic)
 - [TL;DR](#tl;dr)
 - [WTF?](#wtf)
 - [FTW!](#ftw!)
@@ -8,13 +7,6 @@
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-
-# FlowMatic
-
-
-![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png)
-
-The Mythical Next Beast.
 
 TL;DR
 ============================================================================================================
