@@ -2,6 +2,7 @@
 
 
 - [Synopsis](#synopsis)
+- [Examples](#examples)
 - [Testing](#testing)
 - [Building Grammars](#building-grammars)
 	- [Plain Style](#plain-style)
@@ -17,6 +18,11 @@
 
 Experiments in Parser Combinators, Modular Grammars, Domain-Specific Languages (DSLs), Indentation-Based
 Grammars and Symbiotic Programming Languages (that compile to JavaScript). Written in tasty CoffeeScript.
+
+## Examples
+
+Head over to [Arabika عربيكة](https://github.com/loveencounterflow/arabika) to see an example of a
+parametrized grammar written the FlowMatic way.
 
 ## Testing
 
