@@ -24,6 +24,7 @@ echo                      = TRM.echo.bind TRM
 #...........................................................................................................
 ### https://github.com/isaacs/node-glob ###
 GLOB                      = require 'glob'
+cached_route_infos        = null
 
 #-----------------------------------------------------------------------------------------------------------
 @new_route_info = ( route ) ->
@@ -41,17 +42,18 @@ GLOB                      = require 'glob'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@get_route_infos = ( options = {} ) ->
+@get_route_infos = ( options ) ->
   ### Get routes for all grammar modules whose name starts with a digit other than 0: ###
+  return cached_route_infos if cached_route_infos?
   base_route    = process.cwd()
   package_json  = require njs_path.join base_route, 'package.json'
   main_route    = njs_path.join base_route, ( njs_path.dirname package_json[ 'main' ] )
   # debug main_route
   glob          = njs_path.join main_route, '*'
-  whisper "loading grammar from #{glob}"
+  whisper "loading grammar from #{glob}" if options? and options[ 'is-tty' ]
   R             = ( route for route in GLOB.sync glob )
-  matcher       = if options[ 'all' ] then /^[0-9]/ else /^[1-9]/
-  R             = ( route for route in R when matcher.test njs_path.basename route )
+  # matcher       = /^[1-9]/
+  # R             = ( route for route in R when matcher.test njs_path.basename route )
   R             = ( @new_route_info route for route in R )
   #.........................................................................................................
   R.sort ( a, b ) ->
@@ -65,5 +67,5 @@ GLOB                      = require 'glob'
     return -1 if a < b
     return  0
   #.........................................................................................................
-  return R
+  return cached_route_infos = R
 

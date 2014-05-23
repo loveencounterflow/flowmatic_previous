@@ -69,7 +69,7 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
 
 #-----------------------------------------------------------------------------------------------------------
 @main = ->
-  route_infos   = LOADER.get_route_infos all: yes
+  route_infos   = LOADER.get_route_infos 'is-tty': yes
   route_count   = route_infos.length
   skip_count    = 0
   test_count    = 0
