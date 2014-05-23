@@ -1,4 +1,4 @@
-![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png)
+![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-3-1.png)
 
 
 - [Synopsis](#synopsis)

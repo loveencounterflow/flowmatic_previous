@@ -43,16 +43,24 @@ GLOB                      = require 'glob'
 #-----------------------------------------------------------------------------------------------------------
 @get_route_infos = ( options = {} ) ->
   ### Get routes for all grammar modules whose name starts with a digit other than 0: ###
-  debug ( require 'coffeenode-options').get_app_info()
-  glob    = njs_path.join __dirname, '*'
-  R       = ( route for route in GLOB.sync glob )
-  matcher = if options[ 'all' ] then /^[0-9]/ else /^[1-9]/
-  R       = ( route for route in R when matcher.test njs_path.basename route )
-  R       = ( @new_route_info route for route in R )
+  base_route    = process.cwd()
+  package_json  = require njs_path.join base_route, 'package.json'
+  main_route    = njs_path.join base_route, ( njs_path.dirname package_json[ 'main' ] )
+  # debug main_route
+  glob          = njs_path.join main_route, '*'
+  whisper "loading grammar from #{glob}"
+  R             = ( route for route in GLOB.sync glob )
+  matcher       = if options[ 'all' ] then /^[0-9]/ else /^[1-9]/
+  R             = ( route for route in R when matcher.test njs_path.basename route )
+  R             = ( @new_route_info route for route in R )
   #.........................................................................................................
   R.sort ( a, b ) ->
     a = a[ 'nr' ]
     b = b[ 'nr' ]
+    return +1 if a > b
+    return -1 if a < b
+    a = a[ 'name' ]
+    b = b[ 'name' ]
     return +1 if a > b
     return -1 if a < b
     return  0

@@ -20,8 +20,8 @@ urge                      = TRM.get_logger 'urge',      badge
 praise                    = TRM.get_logger 'praise',    badge
 echo                      = TRM.echo.bind TRM
 #...........................................................................................................
-NEW                       = require './NEW'
-LOADER                    = require './grammar-loader'
+# $new                      = require './new'
+LOADER                    = require './LOADER'
 assert                    = require 'assert'
 #...........................................................................................................
 BNP                       = require 'coffeenode-bitsnpieces'
@@ -76,8 +76,9 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
   pass_count    = 0
   fail_count    = 0
   miss_count    = 0
-  matchers      = []
-  for m in process.argv[ 2 .. ]
+  matchers      = process.argv[ 2 .. ]
+  whisper "matching modules with #{( rpr m for m in matchers ).join ', '}" unless matchers.length is 0
+  for m in matchers
     unless /^[0-9]+$/.test m
       m = new RegExp ".*#{BNP.escape_regex m}.*"
     matchers.push m
