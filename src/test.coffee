@@ -61,7 +61,7 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
 
 #-----------------------------------------------------------------------------------------------------------
 @_matches_filter = ( nr, module_name, matchers ) ->
-  return yes if matchers.length is 0
+  return ( nr isnt 0 ) if matchers.length is 0
   for matcher in matchers
     return yes if matcher is "#{nr}"
     return yes if matcher.test? and matcher.test module_name
@@ -78,10 +78,14 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
   miss_count    = 0
   matchers      = process.argv[ 2 .. ]
   whisper "matching modules with #{( rpr m for m in matchers ).join ', '}" unless matchers.length is 0
-  for m in matchers
+  for m, idx in matchers
     unless /^[0-9]+$/.test m
-      m = new RegExp ".*#{BNP.escape_regex m}.*"
-    matchers.push m
+      if m is '+'
+        m = /.*/
+      else
+        m = new RegExp ".*#{BNP.escape_regex m}.*", 'i'
+    matchers[ idx ] = m
+  whisper matchers
   #.........................................................................................................
   for route_info in route_infos
     { route, name: module_name, nr } = route_info
