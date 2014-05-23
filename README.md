@@ -21,7 +21,7 @@ Grammars and Symbiotic Programming Languages (that compile to JavaScript). Writt
 
 ## Examples
 
-Head over to [Arabika عـــرـــبـــيـــكـــة](https://github.com/loveencounterflow/arabika) to see an example of a
+Head over to [Arabika عــرــبــيــكــة](https://github.com/loveencounterflow/arabika) to see an example of a
 parametrized grammar written the FlowMatic way.
 
 ## Testing
