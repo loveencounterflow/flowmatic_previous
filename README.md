@@ -1,21 +1,19 @@
 ![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png)
 
 
-- [FlowMatic](#flowmatic)
-	- [TL;DR](#tl;dr)
-	- [WTF?](#wtf)
-	- [FTW!](#ftw!)
-	- [What gives?](#what-gives)
+- [Synopsis](#synopsis)
+- [TL;DR](#tl;dr)
+- [WTF?](#wtf)
+- [FTW!](#ftw!)
+- [What gives?](#what-gives)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 
-# FlowMatic
+## Synopsis
 
-
-![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-4a.png)
-
-The Mythical Next Beast.
+Experiments in Parser Combinators, Modular Grammars, Domain-Specific Languages (DSLs), Indentation-Based
+Grammars and Symbiotic Programming Languages (that compile to JavaScript). Written in tasty CoffeeScript.
 
 ## TL;DR
 
