@@ -46,8 +46,8 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
     for testing as (1) Node's `assert` distinguishes—unnecessarily—between shallow and deep equality, and,
     worse, [`assert.equal` and `assert.deepEqual` are broken](https://github.com/joyent/node/issues/7161),
     as they use JavaScript's broken `==` equality operator instead of `===`. ###
-    # throw new Error "not equal: \n#{( rpr p for p in P ).join '\n'}" unless BNP.equals P...
-    throw new Error "not equal: \n#{( JSON.stringify p for p in P ).join '\n'}" unless BNP.equals P...
+    throw new Error "not equal: \n#{( rpr p for p in P ).join '\n'}" unless BNP.equals P...
+    # throw new Error "not equal: \n#{( JSON.stringify p for p in P ).join '\n'}" unless r
 
   #---------------------------------------------------------------------------------------------------------
   as_js: ( node ) =>
