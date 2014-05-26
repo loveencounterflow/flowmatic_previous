@@ -68,6 +68,12 @@ PADAG                     = require './PADAG'
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@identifier = ( subtype, name, verbatim ) ->
+  R                 = @_new_node 'Identifier', subtype, verbatim
+  R[ 'name'       ] = name
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 @literal = ( subtype, raw, value, verbatim ) ->
   R                 = @_new_node 'Literal', subtype, verbatim
   R[ 'raw'        ] = raw
@@ -79,8 +85,10 @@ PADAG                     = require './PADAG'
 # ADDITIONAL NODES
 #-----------------------------------------------------------------------------------------------------------
 @x_comment = ( text, subtype = 'comment' ) ->
-  verbatim = '/* ' + ( text.replace /\/\*/g, '/ *' ) + ' */'
-  return @literal subtype, 'xxx', 'xxx', verbatim
+  ### TAINT don't use `verbatim` here as it is target-language specific ###
+  # verbatim = '/* ' + ( text.replace /\/\*/g, '/ *' ) + ' */'
+  # return @literal subtype, 'xxx', 'xxx', verbatim
+  return @literal subtype, text, text
 
 # #-----------------------------------------------------------------------------------------------------------
 # @x_indentation = ( text, level ) ->
@@ -94,6 +102,34 @@ PADAG                     = require './PADAG'
   text = "#{keyword} #{rpr argument}"
   return @x_comment text, 'use-statement'
 
+#-----------------------------------------------------------------------------------------------------------
+@x_symbol = ( mark, raw, value ) ->
+  R             = @_new_node 'Literal', 'symbol'
+  R[ 'x-mark'     ] = mark
+  R[ 'raw'        ] = raw
+  R[ 'value'      ] = value
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@x_relative_route = ( raw, value ) ->
+  R             = @_new_node 'Literal', 'relative-route'
+  R[ 'raw'        ] = raw
+  R[ 'value'      ] = value
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@x_identifier_with_sigil = ( sigil, name ) ->
+  R                 = @_new_node 'Identifier', 'identifier-with-sigil'
+  R[ 'x-sigil'    ] = sigil
+  R[ 'name'       ] = name
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@x_identifier_without_sigil = ( name ) ->
+  R                 = @_new_node 'Identifier', 'identifier-without-sigil'
+  R[ 'name'       ] = name
+  return R
+
 
 #===========================================================================================================
 # HELPERS
@@ -103,6 +139,7 @@ PADAG                     = require './PADAG'
     type:         type
     'x-subtype':  subtype
   R[ 'x-verbatim' ] = verbatim if verbatim?
+  alert "use of verbatim feature discourage at this time: #{rpr verbatim}" if verbatim?
   return R
 
 #-----------------------------------------------------------------------------------------------------------
