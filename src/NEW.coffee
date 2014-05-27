@@ -33,7 +33,10 @@ PADAG                     = require './PADAG'
     #.......................................................................................................
     for rule_name, get_rule of library[ '$new' ]
       unless R[ rule_name ]?
-        R[ rule_name ] = get_rule R, $
+        if TYPES.isa_function get_rule
+          R[ rule_name ] = get_rule R, $
+        else
+          R[ rule_name ] = get_rule
     #.......................................................................................................
     return R
 
@@ -53,6 +56,15 @@ PADAG                     = require './PADAG'
   #.........................................................................................................
   R                 = @_new_node 'ExpressionStatement', subtype, verbatim
   R[ 'expression' ] = expression
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@member_expression = ( subtype, computed, object, property, verbatim ) ->
+  #.........................................................................................................
+  R                 = @_new_node 'MemberExpression', subtype, verbatim
+  R[ 'computed'   ] = computed
+  R[ 'object'     ] = object
+  R[ 'property'   ] = property
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -128,21 +140,25 @@ PADAG                     = require './PADAG'
 
 #-----------------------------------------------------------------------------------------------------------
 @_traverse = ( node, handler ) ->
-  handler node
-  for ignored, sub_node of node
-    continue unless TYPES.isa_list sub_node
-    for sub_sub_node in sub_node
-      @_traverse sub_node, handler
+  ### Traverse a node and all its sub-nodes. We can't use `estraverse` for this task as it does not reliably
+  iterate over non-standard nodes. ###
+  switch type = TYPES.type_of node
+    when 'list'
+      @_traverse element, handler for element in node
+    when 'pod'
+      if node[ 'type' ]?
+        handler node
+      for ignored, sub_node of node
+        # whisper ignored, sub_node
+        @_traverse sub_node, handler
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @_delete_grammar_references = ( node ) ->
+  ### Remove references to issuing grammar from node, including nested sub-nodes; useful for testing. ###
   @_traverse node, ( sub_node ) ->
-    debug node[ 'type' ], node[ 'x-subtype' ]
-    debug node[ 'x-grammar' ]?
-    delete node[ 'x-grammar' ]
-    # debug node
-  return null
+    delete sub_node[ 'x-grammar' ]
+  return node
 
 ############################################################################################################
 # MULTIMIX.bundle @
