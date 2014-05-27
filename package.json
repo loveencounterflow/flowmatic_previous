@@ -27,6 +27,8 @@
     "coffeenode-text": "^0.1.5",
     "coffeenode-trm": "^0.1.15",
     "coffeenode-types": "^0.1.1",
+    "esquery": "^0.3.0",
+    "estraverse": "^1.5.0",
     "glob": "^4.0.0",
     "tsort": "0.0.1",
     "xregexp3": "^3.0.0-pre"

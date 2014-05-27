@@ -1,6 +1,7 @@
 
 
 ############################################################################################################
+TYPES                     = require 'coffeenode-types'
 TRM                       = require 'coffeenode-trm'
 rpr                       = TRM.rpr.bind TRM
 badge                     = '﴾new﴿'
@@ -13,7 +14,7 @@ warn                      = TRM.get_logger 'warn',      badge
 help                      = TRM.get_logger 'help',      badge
 echo                      = TRM.echo.bind TRM
 #...........................................................................................................
-MULTIMIX                  = require 'coffeenode-multimix'
+# MULTIMIX                  = require 'coffeenode-multimix'
 PADAG                     = require './PADAG'
 
 
@@ -102,34 +103,6 @@ PADAG                     = require './PADAG'
   text = "#{keyword} #{rpr argument}"
   return @x_comment text, 'use-statement'
 
-#-----------------------------------------------------------------------------------------------------------
-@x_symbol = ( mark, raw, value ) ->
-  R             = @_new_node 'Literal', 'symbol'
-  R[ 'x-mark'     ] = mark
-  R[ 'raw'        ] = raw
-  R[ 'value'      ] = value
-  return R
-
-#-----------------------------------------------------------------------------------------------------------
-@x_relative_route = ( raw, value ) ->
-  R             = @_new_node 'Literal', 'relative-route'
-  R[ 'raw'        ] = raw
-  R[ 'value'      ] = value
-  return R
-
-#-----------------------------------------------------------------------------------------------------------
-@x_identifier_with_sigil = ( sigil, name ) ->
-  R                 = @_new_node 'Identifier', 'identifier-with-sigil'
-  R[ 'x-sigil'    ] = sigil
-  R[ 'name'       ] = name
-  return R
-
-#-----------------------------------------------------------------------------------------------------------
-@x_identifier_without_sigil = ( name ) ->
-  R                 = @_new_node 'Identifier', 'identifier-without-sigil'
-  R[ 'name'       ] = name
-  return R
-
 
 #===========================================================================================================
 # HELPERS
@@ -143,10 +116,35 @@ PADAG                     = require './PADAG'
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_add_verbatim = ( node, verbatim ) ->
+@_XXX_node = ( grammar, type, subtype ) ->
+  ### TAINT method to replace `_new_node` ###
+  R =
+    type:         type
+    'x-subtype':  subtype
+    'x-grammar':  grammar
+  # R[ 'x-verbatim' ] = verbatim if verbatim?
+  # alert "use of verbatim feature discourage at this time: #{rpr verbatim}" if verbatim?
+  return R
 
+#-----------------------------------------------------------------------------------------------------------
+@_traverse = ( node, handler ) ->
+  handler node
+  for ignored, sub_node of node
+    continue unless TYPES.isa_list sub_node
+    for sub_sub_node in sub_node
+      @_traverse sub_node, handler
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_delete_grammar_references = ( node ) ->
+  @_traverse node, ( sub_node ) ->
+    debug node[ 'type' ], node[ 'x-subtype' ]
+    debug node[ 'x-grammar' ]?
+    delete node[ 'x-grammar' ]
+    # debug node
+  return null
 
 ############################################################################################################
-MULTIMIX.bundle @
+# MULTIMIX.bundle @
 
 
