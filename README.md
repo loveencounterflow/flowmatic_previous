@@ -47,6 +47,7 @@ Each FlowMatic grammar module consists of four parts:
 * **`@tests`** which should aim to cover major parts for correct code acceptance,
   code rejection, and code translation.
 
+We'll look at each part in turns below.
 
 I usually copy-and-paste something like the following to the top of my grammar files:
 
@@ -92,9 +93,12 @@ influence how assignment dialects of Arabika will work: which literal is used to
 (in many languages, this would be `=`; i believe leaving the equals sign for equality testing is a better
 idea), and whether there will be mandatory (ignored) linear whitespace (that's `ilws` for short) before
 and after that literal (i like to write `a: 42` rather than `a : 42`; i also don't like forms that are
-too condensed, so `a:42` is prohibited—remember that with FlowMatic, you can always change that).
+too condensed, so `a:42` is prohibited—remember that with FlowMatic, you can always change that).—Note that
+the options as presented here are maybe not optimal as they allow to define mandatory but not optional
+whitespace. Also, we are limited to linear whitespace to separate right hand side, mark, and left hand side.
+Then again, it's probably a good idea to look for a reasonable balance between complexity and flexibility.
 
-After the options, **rules** rule. The `@rules`, `@nodes` and `@tests` members of the `module.exports`
+After the options, **rules** rule. The `@rules` and the `@nodes` members of the `module.exports`
 object (i.e. `this == @`) are all functions that accept a grammar and an options object and return an object
 with bespoke methods (i.e. methods that honor the settings found in `$`—*not* those in `@$`, which are the
 default options and not necessarily those needed for a given dialect).
@@ -128,7 +132,7 @@ scoping rules, the return value of the outer function must have a different name
 used in an inner function, so `RR` is an expedient here (btw i plan to distinguish those as `../R` and
 `./R` in Arabika to make scoping more explicit).
 
-The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that **nodes** thing. It's
+The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that **nodes** thing. Its
 outline looks very much like that of `@rules`, above:
 
 ````coffeescript
