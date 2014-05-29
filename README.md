@@ -28,7 +28,11 @@ parametrized grammar written the FlowMatic way.
 
 ## Building Grammars
 
-Each grammar module consists of several parts:
+> **### TAINT the following principled outlines may not yet be implemented or be implemented in a slightly
+> different way; currently they are more of a blueprint how to evolve FlowMatic so that building grammars
+> becomes more straightforward and less fraught with boilerplate. ###**
+
+Each grammar module consists of four parts:
 
 * **`@$`**: a fallback options POD;
 * **`@rules`**: the grammar rules proper;
@@ -75,6 +79,9 @@ Each grammar module consists of several parts:
         'lhs':  lhs
         'mark': mark
         'rhs':  rhs
+
+  #----------------------------------------------------------------------------
+  RR.assignment.coffee = ( node ) ->
 
   #----------------------------------------------------------------------------
   return RR
