@@ -148,14 +148,15 @@ outline looks very much like that of `@rules`, above:
         'rhs':  rhs
 
   #----------------------------------------------------------------------------
-  RR.assignment.coffee = ( node ) ->
-    ### TAINT looking into reducing boilerplate especially here: ###
-    { lhs, 'x-mark': mark, rhs } = node
-    lhs_result  = ƒ.as.coffee lhs
-    rhs_result  = ƒ.as.coffee rhs
-    target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
-    taints      = ƒ.as._collect_taints lhs_result, rhs_result
-    return target: target, taints: taints
+  RR.assignment.as =
+    coffee: ( node ) ->
+      ### TAINT looking into reducing boilerplate especially here: ###
+      { lhs, 'x-mark': mark, rhs } = node
+      lhs_result  = ƒ.as.coffee lhs
+      rhs_result  = ƒ.as.coffee rhs
+      target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
+      taints      = ƒ.as._collect_taints lhs_result, rhs_result
+      return target: target, taints: taints
 
   #----------------------------------------------------------------------------
   return RR
@@ -163,8 +164,9 @@ outline looks very much like that of `@rules`, above:
 
 As a matter of convention, **(1)** each node producing function sees to it that a reference to the current
 grammar `G` gets recorded in each node, and **(2)** provides, under
-`G.nodes.$node-type.$target-language-name`, a method that is responsible for turning that specific node type
-into, you guessed it, (an object that represents) target code.
+`G.nodes.<node-type>.as.<target-language-name>` (that's `@nodes.assignment.as.coffee` here) a method which
+is responsible for turning that specific node type into, you guessed it, (an object that represents) target
+code.
 
 Point (1) is necessary so we can keep track of translation responsibilities. After all, it is intended to
 make FlowMatic grammars so flexible they may be changed in the middle of a source file (in fact nothing
