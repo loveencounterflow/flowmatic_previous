@@ -36,7 +36,7 @@ Each grammar module consists of four parts:
 
 * **`@$`**: a fallback options POD;
 * **`@rules`**: the grammar rules proper;
-* **`@new`**: methods to generate AST nodes, with
+* **`@nodes`**: methods to generate AST nodes, with
   * each method providing translators to target languages;
 * **`@tests`** which should aim to cover major parts for correct code acceptance,
   code rejection, and code translation.
@@ -65,18 +65,25 @@ NAME                      = require './6-name'
 ````
 
 This gives me an ample supply of logging methods with colorful outputs and a 'badge' that tells me where
-outputs come from.
+outputs come from. The `ƒ` is a handy shortcut for FlowMatic; i need it all over the place so i want to
+make that a snappy one. Also all over the place are reference to the current grammar and its options,
+which are abbreviated as `G` and `$`.
 
 Next up is an options POD, which contains all the default settings of the grammar. When defining a dialect,
 you often want to change some or all of these values (or introduce your own new rules):
 
 ````coffeescript
 #------------------------------------------------------------------------------
-@$ = ( G, $ ) ->
+@$ =
   'mark':                 ':'
   'needs-ilws-before':    no  # is throw-away whitespace necessary before `:`?
   'needs-ilws-after':     yes # is throw-away whitespace necessary after  `:`?
 ````
+
+After the options, rules rule. The `@rules`, `@nodes` and `@tests` members of the `module.exports` object
+(i.e. `this == @`) are all functions that accept a grammar and an options object and return an object with
+bespoke methods (i.e. methods that honor the settings found in `$`—*not* those in `@$`, which are the
+default options and not necessarily those needed for a given dialect).
 
 ````coffeescript
 #------------------------------------------------------------------------------
@@ -89,9 +96,11 @@ you often want to change some or all of these values (or introduce your own new 
       R = ƒ.seq NAME.route, CHR.ilws, $[ 'mark' ], CHR.ilws, ( -> G.expression )
     else
       R = ƒ.seq NAME.route,           $[ 'mark' ], CHR.ilws, ( -> G.expression )
-    R = R.onMatch ( match, state ) -> G.new_node.assignment match..., state
+    R = R.onMatch ( match, state ) -> G.nodes.assignment match..., state
     R = R.describe 'assignment'
     return R
+
+  ### ... more rules ... ###
 
   #----------------------------------------------------------------------------
   return RR
@@ -99,7 +108,7 @@ you often want to change some or all of these values (or introduce your own new 
 
 ````coffeescript
 #------------------------------------------------------------------------------
-@new = ( G, $ ) ->
+@nodes = ( G, $ ) ->
   RR = {}
 
   #----------------------------------------------------------------------------
