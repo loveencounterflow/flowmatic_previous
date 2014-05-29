@@ -32,22 +32,81 @@ Each grammar module consists of five parts:
 
 * the grammar rules proper;
 * a fallback options POD;
-* methods to generate AST nodes;
-* translators to target languages;
+* methods to generate AST nodes, with
+  * each method providing translators to target languages;
 * tests.
 
 ````coffeescript
+#------------------------------------------------------------------------------
+@rules = ( G, $ ) ->
+  RR = {}
 
-#-----------------------------------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
+  RR.assignment = ( G, $ ) ->
+    if $[ 'needs-ilws-before' ]
+      R = ƒ.seq NAME.route, CHR.ilws, $[ 'mark' ], CHR.ilws, ( -> G.expression )
+    else
+      R = ƒ.seq NAME.route,           $[ 'mark' ], CHR.ilws, ( -> G.expression )
+    R = R.onMatch ( match, state ) -> G.new_node.assignment match..., state
+    R = R.describe 'assignment'
+    return R
+
+  #----------------------------------------------------------------------------
+  return RR
+````
+
+````coffeescript
+#------------------------------------------------------------------------------
+@new = ( G, $ ) ->
+  RR = {}
+
+  #----------------------------------------------------------------------------
+  RR.assignment = ( lhs, mark, rhs, state ) ->
+      return ƒ.new.node G, 'assignment', state,
+        'lhs':  lhs
+        'mark': mark
+        'rhs':  rhs
+
+  #----------------------------------------------------------------------------
+  return RR
+````
+
+````coffeescript
+#------------------------------------------------------------------------------
+@as = ( G, $ ) ->
+  RR = {}
+
+  #----------------------------------------------------------------------------
+  RR.coffee = ( node ) ->
+    #..........................................................................
+    switch type = node[ 'type' ]
+      #........................................................................
+      when 'foobar'
+        taints =
+          'experimental version of `foobar`'
+        target =  "#{node[ 'value' ]} * 2"
+        return target: target, taints: taints
+
+      # ... more node type-specific stuff ...
+
+      #........................................................................
+      else
+        throw new Error
+  return RR
+````
+
+````coffeescript
+#------------------------------------------------------------------------------
 @tests = ( G, $ ) ->
   RR = {}
 
+  #----------------------------------------------------------------------------
   RR[ 'integer: parses sequences of ASCII digits' ] = ( test ) ->
     test.eq ...
 
+  # ... more tests ...
+
   return RR
-
-
 ````
 
 
