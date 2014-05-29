@@ -28,13 +28,22 @@ parametrized grammar written the FlowMatic way.
 
 ## Building Grammars
 
-Each grammar module consists of five parts:
+Each grammar module consists of several parts:
 
-* the grammar rules proper;
-* a fallback options POD;
-* methods to generate AST nodes, with
+* **`@$`**: a fallback options POD;
+* **`@rules`**: the grammar rules proper;
+* **`@new`**: methods to generate AST nodes, with
   * each method providing translators to target languages;
-* tests.
+* **`@tests`** which should aim to cover major parts for correct code acceptance,
+  code rejection, and code translation.
+
+````coffeescript
+#------------------------------------------------------------------------------
+@$ = ( G, $ ) ->
+  'mark':                 ':'
+  'needs-ilws-before':    no
+  'needs-ilws-after':     yes
+````
 
 ````coffeescript
 #------------------------------------------------------------------------------
