@@ -32,7 +32,13 @@ parametrized grammar written the FlowMatic way.
 > different way; currently they are more of a blueprint how to evolve FlowMatic so that building grammars
 > becomes more straightforward and less fraught with boilerplate. ###**
 
-Each grammar module consists of four parts:
+In this section, i want to give an outline what building a FlowMatic grammar entails; as an example, i quote
+from the
+[assignments module](https://github.com/loveencounterflow/arabika/blob/master/src/10-assignment.coffee)
+of [Arabika](https://github.com/loveencounterflow/arabika), an experiment where i try and test
+the FlowMatic way of doing programming languages.
+
+Each FlowMatic grammar module consists of four parts:
 
 * **`@$`**: a fallback options POD;
 * **`@rules`**: the grammar rules proper;
@@ -40,6 +46,7 @@ Each grammar module consists of four parts:
   * each method providing translators to target languages;
 * **`@tests`** which should aim to cover major parts for correct code acceptance,
   code rejection, and code translation.
+
 
 I usually copy-and-paste something like the following to the top of my grammar files:
 
@@ -54,7 +61,7 @@ alert                     = TRM.get_logger 'alert',     badge
 debug                     = TRM.get_logger 'debug',     badge
 warn                      = TRM.get_logger 'warn',      badge
 help                      = TRM.get_logger 'help',      badge
-#...........................................................................................................
+#..............................................................................
 ### OBS! always `require 'flowmatic'` before grammar modules! ###
 ƒ                         = require 'flowmatic'
 BNP                       = require 'coffeenode-bitsnpieces'
@@ -79,6 +86,13 @@ you often want to change some or all of these values (or introduce your own new 
   'needs-ilws-before':    no  # is throw-away whitespace necessary before `:`?
   'needs-ilws-after':     yes # is throw-away whitespace necessary after  `:`?
 ````
+
+In this example, since we're talking about parsing and constructing assignments, we have three settings to
+influence how assignment dialects of Arabika will work: which literal is used to 'announce the assignment'
+(in many languages, this would be `=`; i believe leaving the equals sign for equality testing is a better
+idea), and whether there will be mandatory (ignored) linear whitespace (that's `ilws` for short) before
+and after that literal (i like to write `a: 42` rather than `a : 42`; i also don't like forms that are
+too condensed, so `a:42` is prohibited—remember that with FlowMatic, you can always change that).
 
 After the options, rules rule. The `@rules`, `@nodes` and `@tests` members of the `module.exports` object
 (i.e. `this == @`) are all functions that accept a grammar and an options object and return an object with
