@@ -20,6 +20,7 @@ rainbow                   = TRM.rainbow.bind TRM
 @new                      = require './new'
 @_loader                  = require './LOADER'
 MULTIMIX                  = require 'coffeenode-multimix'
+ƒ                         = @
 π                         = require 'coffeenode-packrattle'
 # info ( name for name of @ ).sort().join ' '
 # info ( name for name of π ).sort().join ' '
@@ -61,6 +62,45 @@ MULTIMIX                  = require 'coffeenode-multimix'
 #-----------------------------------------------------------------------------------------------------------
 @on = ( hint ) ->
   ### Method to replace `.onMatch` and `onFail`. ###
+
+#-----------------------------------------------------------------------------------------------------------
+@as = ( target_language_name, node ) ->
+  translator = @as[ target_language_name ]
+  throw new Error "unknown target language #{rpr target_language_name}" unless translator?
+  return translator node
+
+#-----------------------------------------------------------------------------------------------------------
+@as._collect_taints = ( translations... ) ->
+  taints = {}
+  for translation in translations
+    continue unless ( taints = translation[ 'taints'] )?
+    taints[ taint ] = 1 for taint in taints
+  return taints
+
+#-----------------------------------------------------------------------------------------------------------
+@as.coffee = ( node ) ->
+  return grammar.as.coffee node if ( grammar = node[ 'x-grammar' ] )?
+  type    = node[ 'type' ]
+  type   += '/' + node[ 'x-subtype' ] if node[ 'x-subtype' ]?
+  target  = if node[ 'value' ]? then rpr node[ 'value' ] else rpr node
+  taints  = {}
+  taints[ "unable to find translator for #{type}" ] = 1
+  return target: target, taints: taints
+
+#-----------------------------------------------------------------------------------------------------------
+@as.coffee.target = ( translations... ) ->
+  ### TAINT what about indentation? ###
+  taints  = ƒ.as.coffee.taints translations...
+  R       = [ taints, ]
+  R.push translation[ 'target' ] for translation in translations
+  return R.join ''
+
+#-----------------------------------------------------------------------------------------------------------
+@as.coffee.taints = ( translations... ) ->
+  taints = ƒ.as._collect_taints translations...
+  taints = ( taint for taint of taints ).sort()
+  return ( ( "### #{taint} ###\n" for taint in taints ).join '' )
+
 
 
 ############################################################################################################

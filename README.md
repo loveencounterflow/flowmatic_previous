@@ -28,6 +28,29 @@ parametrized grammar written the FlowMatic way.
 
 ## Building Grammars
 
+Each grammar module consists of five parts:
+
+* the grammar rules proper;
+* a fallback options POD;
+* methods to generate AST nodes;
+* translators to target languages;
+* tests.
+
+````coffeescript
+
+#-----------------------------------------------------------------------------------------------------------
+@tests = ( G, $ ) ->
+  RR = {}
+
+  RR[ 'integer: parses sequences of ASCII digits' ] = ( test ) ->
+    test.eq ...
+
+  return RR
+
+
+````
+
+
 ### Plain Style
 
 ### Parametrized Style

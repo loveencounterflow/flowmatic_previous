@@ -16,7 +16,16 @@ echo                      = TRM.echo.bind TRM
 #...........................................................................................................
 # MULTIMIX                  = require 'coffeenode-multimix'
 PADAG                     = require './PADAG'
+LODASH                    = require 'lodash'
 
+
+#===========================================================================================================
+# HELPERS
+#-----------------------------------------------------------------------------------------------------------
+copy = ( value ) ->
+  ### Return a deep copy of `value`. ###
+  ### TAINT will fail silently for anything but lists and PODs ###
+  return LODASH.merge ( if TYPES.isa_list value then [] else {} ), value
 
 
 #===========================================================================================================
