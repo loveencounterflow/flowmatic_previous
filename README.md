@@ -73,7 +73,7 @@ NAME                      = require './6-name'
 
 This gives me an ample supply of logging methods with colorful outputs and a 'badge' that tells me where
 outputs come from. The `ƒ` is a handy shortcut for FlowMatic; i need it all over the place so i want to
-make that a snappy one. Also all over the place are reference to the current grammar and its options,
+make that a snappy one. Also all over the place are references to the current grammar and its options,
 which are abbreviated as `G` and `$`.
 
 Next up is an options POD, which contains all the default settings of the grammar. When defining a dialect,
@@ -120,6 +120,17 @@ default options and not necessarily those needed for a given dialect).
   return RR
 ````
 
+I've found this format after going through several stages of more experimental designs; basically the idea
+is that `@rules` is expected to return an object with custom methods on it; the simplest way to define that
+is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
+that (1) i nearly always call return values `R`, which i find helpful for reading; (2) due to CoffeeScript's
+scoping rules, the return value of the outer function must have a different name than that of any variable
+used in an inner function, so `RR` is an expedient here (btw i plan to distinguish those as `../R` and
+`./R` in Arabika to make scoping more explicit).
+
+The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that `@nodes` thing. It's
+outline looks very much like that of `@rules`, above:
+
 ````coffeescript
 #------------------------------------------------------------------------------
 @nodes = ( G, $ ) ->
@@ -127,7 +138,7 @@ default options and not necessarily those needed for a given dialect).
 
   #----------------------------------------------------------------------------
   RR.assignment = ( lhs, mark, rhs, state ) ->
-      return ƒ.new.node G, 'assignment', state,
+      return ƒ.new_node G, 'assignment', state,
         'lhs':  lhs
         'mark': mark
         'rhs':  rhs
@@ -145,6 +156,23 @@ default options and not necessarily those needed for a given dialect).
   #----------------------------------------------------------------------------
   return RR
 ````
+
+As a matter of convention, **(1)** each node producing function sees to it that a reference to the current
+grammar `G` gets recorded in each node, and **(2)** provides, under
+`G.nodes.$node-type.$target-language-name`, a method that is responsible for turning that specific node type
+into, you guessed it, (an object that represents) target code.
+
+Point (1) is necessary so we can keep track of translation responsibilities. After all, it is intended to
+make FlowMatic grammars so flexible they may be changed in the middle of a source file (in fact nothing
+new—you already know embedded languages from HTML that contains JavaScript and CSS), so we need a way to
+track those grammars. As for point (2), i started out with returning pure strings, but that's too inflexible
+when you want to do references to the original code and stuff like that. In the above, we demonstrate (in
+a somehwat wordy fashion) how to deal with 'taints', that's remarks originating in node translators when
+code is known to be less than perfect. Using taints, we can go and produce code even with experimental
+translation methods and warn about their flaws in the resulting target language; when translating to
+CoffeeScript, those taints will usually get turned into `### TAINT yaddayadda ###` block comments that will
+persist even when those CoffeeScript sources are themselves translated to JavaScript.
+
 
 
 ````coffeescript
