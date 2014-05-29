@@ -76,8 +76,8 @@ outputs come from. The `ƒ` is a handy shortcut for FlowMatic; i need it all ove
 make that a snappy one. Also all over the place are references to the current grammar and its options,
 which are abbreviated as `G` and `$`.
 
-Next up is an options POD, which contains all the default settings of the grammar. When defining a dialect,
-you often want to change some or all of these values (or introduce your own new rules):
+Next up is an **options POD**, which contains all the default settings of the grammar. When defining a
+dialect, you often want to change some or all of these values (or introduce your own new rules):
 
 ````coffeescript
 #------------------------------------------------------------------------------
@@ -94,9 +94,9 @@ idea), and whether there will be mandatory (ignored) linear whitespace (that's `
 and after that literal (i like to write `a: 42` rather than `a : 42`; i also don't like forms that are
 too condensed, so `a:42` is prohibited—remember that with FlowMatic, you can always change that).
 
-After the options, rules rule. The `@rules`, `@nodes` and `@tests` members of the `module.exports` object
-(i.e. `this == @`) are all functions that accept a grammar and an options object and return an object with
-bespoke methods (i.e. methods that honor the settings found in `$`—*not* those in `@$`, which are the
+After the options, **rules** rule. The `@rules`, `@nodes` and `@tests` members of the `module.exports`
+object (i.e. `this == @`) are all functions that accept a grammar and an options object and return an object
+with bespoke methods (i.e. methods that honor the settings found in `$`—*not* those in `@$`, which are the
 default options and not necessarily those needed for a given dialect).
 
 ````coffeescript
@@ -128,7 +128,7 @@ scoping rules, the return value of the outer function must have a different name
 used in an inner function, so `RR` is an expedient here (btw i plan to distinguish those as `../R` and
 `./R` in Arabika to make scoping more explicit).
 
-The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that `@nodes` thing. It's
+The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that **nodes** thing. It's
 outline looks very much like that of `@rules`, above:
 
 ````coffeescript
@@ -173,20 +173,24 @@ translation methods and warn about their flaws in the resulting target language;
 CoffeeScript, those taints will usually get turned into `### TAINT yaddayadda ###` block comments that will
 persist even when those CoffeeScript sources are themselves translated to JavaScript.
 
+Lastly, we have the **tests**; these are implemented as an object literal with methods. As a matter of
+style, i like my test functions to bear descriptive, readable names, for which reasons i attach them as
+quoted strings to the `@test` object.
 
+Each test function should accept a `test` argument; this is an object with methods frequently needed for
+testing (such as `test.eq` for reliable deep-equality tests, and `test.ok` to test for boolean results).
+Each method of `@test` should throw an exception when results are not up to expectations; `test.eq` and
+`test.ok` will do that for you.
 
 ````coffeescript
 #------------------------------------------------------------------------------
-@tests = ( G, $ ) ->
-  RR = {}
+@tests =
 
   #----------------------------------------------------------------------------
-  RR[ 'integer: parses sequences of ASCII digits' ] = ( test ) ->
+  'integer: parses sequences of ASCII digits': ( test ) ->
     test.eq ...
 
   # ... more tests ...
-
-  return RR
 ````
 
 
