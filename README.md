@@ -41,12 +41,41 @@ Each grammar module consists of four parts:
 * **`@tests`** which should aim to cover major parts for correct code acceptance,
   code rejection, and code translation.
 
+I usually copy-and-paste something like the following to the top of my grammar files:
+
+````coffeescript
+TRM                       = require 'coffeenode-trm'
+rpr                       = TRM.rpr.bind TRM
+badge                     = '﴾10-assignment﴿'
+log                       = TRM.get_logger 'plain',     badge
+info                      = TRM.get_logger 'info',      badge
+whisper                   = TRM.get_logger 'whisper',   badge
+alert                     = TRM.get_logger 'alert',     badge
+debug                     = TRM.get_logger 'debug',     badge
+warn                      = TRM.get_logger 'warn',      badge
+help                      = TRM.get_logger 'help',      badge
+#...........................................................................................................
+### OBS! always `require 'flowmatic'` before grammar modules! ###
+ƒ                         = require 'flowmatic'
+BNP                       = require 'coffeenode-bitsnpieces'
+TEXT                      = require './2-text'
+CHR                       = require './3-chr'
+NUMBER                    = require './4-number'
+NAME                      = require './6-name'
+````
+
+This gives me an ample supply of logging methods with colorful outputs and a 'badge' that tells me where
+outputs come from.
+
+Next up is an options POD, which contains all the default settings of the grammar. When defining a dialect,
+you often want to change some or all of these values (or introduce your own new rules):
+
 ````coffeescript
 #------------------------------------------------------------------------------
 @$ = ( G, $ ) ->
   'mark':                 ':'
-  'needs-ilws-before':    no
-  'needs-ilws-after':     yes
+  'needs-ilws-before':    no  # is throw-away whitespace necessary before `:`?
+  'needs-ilws-after':     yes # is throw-away whitespace necessary after  `:`?
 ````
 
 ````coffeescript
@@ -82,34 +111,18 @@ Each grammar module consists of four parts:
 
   #----------------------------------------------------------------------------
   RR.assignment.coffee = ( node ) ->
+    ### TAINT looking into reducing boilerplate especially here: ###
+    { lhs, 'x-mark': mark, rhs } = node
+    lhs_result  = ƒ.as.coffee lhs
+    rhs_result  = ƒ.as.coffee rhs
+    target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
+    taints      = ƒ.as._collect_taints lhs_result, rhs_result
+    return target: target, taints: taints
 
   #----------------------------------------------------------------------------
   return RR
 ````
 
-````coffeescript
-#------------------------------------------------------------------------------
-@as = ( G, $ ) ->
-  RR = {}
-
-  #----------------------------------------------------------------------------
-  RR.coffee = ( node ) ->
-    #..........................................................................
-    switch type = node[ 'type' ]
-      #........................................................................
-      when 'foobar'
-        taints =
-          'experimental version of `foobar`'
-        target =  "#{node[ 'value' ]} * 2"
-        return target: target, taints: taints
-
-      # ... more node type-specific stuff ...
-
-      #........................................................................
-      else
-        throw new Error
-  return RR
-````
 
 ````coffeescript
 #------------------------------------------------------------------------------
