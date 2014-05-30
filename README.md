@@ -109,7 +109,7 @@ default options and not necessarily those needed for a given dialect).
   RR = {}
 
   #----------------------------------------------------------------------------
-  RR.assignment = ( G, $ ) ->
+  RR.assignment = ->
     if $[ 'needs-ilws-before' ]
       R = ƒ.seq NAME.route, CHR.ilws, $[ 'mark' ], CHR.ilws, ( -> G.expression )
     else
@@ -172,12 +172,14 @@ Point (1) is necessary so we can keep track of translation responsibilities. Aft
 make FlowMatic grammars so flexible they may be changed in the middle of a source file (in fact nothing
 new—you already know embedded languages from HTML that contains JavaScript and CSS), so we need a way to
 track those grammars. As for point (2), i started out with returning pure strings, but that's too inflexible
-when you want to do references to the original code and stuff like that. In the above, we demonstrate (in
-a somehwat wordy fashion) how to deal with 'taints', that's remarks originating in node translators when
-code is known to be less than perfect. Using taints, we can go and produce code even with experimental
-translation methods and warn about their flaws in the resulting target language; when translating to
-CoffeeScript, those taints will usually get turned into `### TAINT yaddayadda ###` block comments that will
-persist even when those CoffeeScript sources are themselves translated to JavaScript.
+when you want to do references to the original code and stuff like that.
+
+> In the above, we demonstrate (in
+> a somewhat wordy fashion) how to deal with 'taints', that's remarks originating in node translators when
+> code is known to be less than perfect. Using taints, we can go and produce code even with experimental
+> translation methods and warn about their flaws in the resulting target language; when translating to
+> CoffeeScript, those taints will usually get turned into `### TAINT yaddayadda ###` block comments that will
+> persist even when those CoffeeScript sources are themselves translated to JavaScript.
 
 Lastly, we have the **tests**; these are implemented as an object literal with methods. As a matter of
 style, i like my test functions to bear descriptive, readable names, for which reasons i attach them as
