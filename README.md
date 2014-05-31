@@ -114,48 +114,47 @@ with defining rules, translators, and node-producing routines:
 
 
 ````coffeescript
-#------------------------------------------------------------------------------
-@constructor = ( G, $ ) ->
-
-  #============================================================================
-  # RULES
-  #----------------------------------------------------------------------------
-  G.expression = ->
-    ### TAINT placeholder method for a more complete version of what contitutes
-    an expression ###
-    R = ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route
-
-  #----------------------------------------------------------------------------
-  G.assignment = ->
-    ilws_before = if $[ 'needs-lws-before' ] then $.CHR.ilws else ƒ.drop ''
-    ilws_after  = if $[ 'needs-lws-after'  ] then $.CHR.ilws else ƒ.drop ''
-    R = ƒ.seq $.NAME.route, ilws_before, $[ 'mark' ], ilws_after, ( -> G.expression )
-    R = R.onMatch ( match ) -> G.nodes.assignment match...
-    R = R.describe 'assignment'
-    return R
-
-  #============================================================================
-  # TRANSLATORS
-  #----------------------------------------------------------------------------
-  G.assignment.as =
-    coffee: ( node ) ->
-      { lhs, mark, rhs } = node
-      lhs_result  = ƒ.as.coffee lhs
-      rhs_result  = ƒ.as.coffee rhs
-      target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
-      taints      = ƒ.as._collect_taints lhs_result, rhs_result
-      whisper taints
-      return target: target, taints: taints
-
-  #============================================================================
-  # NODES
-  #----------------------------------------------------------------------------
-  G.nodes.assignment = ( lhs, mark, rhs ) ->
-    R                 = ƒ.new.node G.assignment.as, 'assignment'
-    R[ 'lhs'        ] = lhs
-    R[ 'mark'       ] = mark
-    R[ 'rhs'        ] = rhs
-    return R
+#------------------------------------------------------------------------------  #  1
+@constructor = ( G, $ ) ->                                                       #  2
+                                                                                 #  3
+  #============================================================================  #  4
+  # RULES                                                                        #  5
+  #----------------------------------------------------------------------------  #  6
+  G._TMP_expression = ->                                                         #  7
+    ### TAINT placeholder method for a more complete version of what contitutes  #  8
+    an expression ###                                                            #  9
+    R = ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route                      # 10
+                                                                                 # 11
+  #----------------------------------------------------------------------------  # 12
+  G.assignment = ->                                                              # 13
+    lws1 = if $[ 'needs-lws-before' ] then $.CHR.ilws else ƒ.drop ''             # 14
+    lws2 = if $[ 'needs-lws-after'  ] then $.CHR.ilws else ƒ.drop ''             # 15
+    return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
+    .onMatch ( match ) -> G.nodes.assignment match...                            # 17
+    .describe 'assignment'                                                       # 18
+                                                                                 # 19
+  #============================================================================  # 20
+  # TRANSLATORS                                                                  # 21
+  #----------------------------------------------------------------------------  # 22
+  G.assignment.as =                                                              # 23
+    coffee: ( node ) ->                                                          # 24
+      { lhs, mark, rhs } = node                                                  # 25
+      lhs_result  = ƒ.as.coffee lhs                                              # 26
+      rhs_result  = ƒ.as.coffee rhs                                              # 27
+      target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""  # 28
+      taints      = ƒ.as._collect_taints lhs_result, rhs_result                  # 29
+      whisper taints                                                             # 30
+      return target: target, taints: taints                                      # 31
+                                                                                 # 32
+  #============================================================================  # 33
+  # NODES                                                                        # 34
+  #----------------------------------------------------------------------------  # 35
+  G.nodes.assignment = ( lhs, mark, rhs ) ->                                     # 36
+    R                 = ƒ.new.node G.assignment.as, 'assignment'                 # 37
+    R[ 'lhs'        ] = lhs                                                      # 38
+    R[ 'mark'       ] = mark                                                     # 39
+    R[ 'rhs'        ] = rhs                                                      # 40
+    return R                                                                     # 41
 ````
 
 I've found this format after going through several stages of more experimental designs; basically the idea
