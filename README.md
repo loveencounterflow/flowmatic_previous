@@ -109,7 +109,8 @@ of the module level so they become configurable. When you want to produce an Ara
 you may call something like `ƒ.new.grammar assignment, NAME: require 'my-name-grammar'` to change the way
 variable identifiers are parsed.
 
-After the options comes the constructor.
+After the options comes the constructor. In the code below, i've highlighted its three sections which deal
+with defining rules, translators, and node-producing routines:
 
 
 ````coffeescript
@@ -120,7 +121,8 @@ After the options comes the constructor.
   # RULES
   #----------------------------------------------------------------------------
   G.expression = ->
-    ### TAINT placeholder method for a more complete version of what contitutes an expression ###
+    ### TAINT placeholder method for a more complete version of what contitutes
+    an expression ###
     R = ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route
 
   #----------------------------------------------------------------------------
@@ -132,26 +134,24 @@ After the options comes the constructor.
     R = R.describe 'assignment'
     return R
 
+  #============================================================================
+  # TRANSLATORS
   #----------------------------------------------------------------------------
   G.assignment.as =
     coffee: ( node ) ->
       { lhs, mark, rhs } = node
       lhs_result  = ƒ.as.coffee lhs
       rhs_result  = ƒ.as.coffee rhs
-      # whisper lhs_result
-      # whisper rhs_result
       target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
       taints      = ƒ.as._collect_taints lhs_result, rhs_result
       whisper taints
       return target: target, taints: taints
 
-
   #============================================================================
   # NODES
   #----------------------------------------------------------------------------
   G.nodes.assignment = ( lhs, mark, rhs ) ->
-    # R                 = ƒ.new._XXX_node G, 'Literal', 'assignment'
-    R                 = ƒ.new._XXX_YYY_node G.assignment.as, 'Literal', 'assignment'
+    R                 = ƒ.new.node G.assignment.as, 'assignment'
     R[ 'lhs'        ] = lhs
     R[ 'mark'       ] = mark
     R[ 'rhs'        ] = rhs
