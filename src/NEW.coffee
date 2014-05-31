@@ -50,19 +50,67 @@ copy = ( value ) ->
     return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_XXX_grammar = ( G, $ ) ->
-  ### to replace `@new`, above ###
-  $   = LODASH.merge ( $ ? {} ), G.$
-  R   = G ? {}
-  R.$ = $
-  #.......................................................................................................
-  for rule_name, get_rule of library[ 'rules' ]
-    # throw new Error "detected" if is_reserved[ rule_name ]
-    unless R[ rule_name ]?
-      R[ rule_name ] = if TYPES.isa_function get_rule then get_rule R, $ else get_rule
-  #.......................................................................................................
-  return R
+@grammar = ( target, grammar, options ) ->
+  ###
 
+  call as:
+    * `ƒ.new.grammar G` with a given grammar to instantiate a new grammar using default options. This
+      should never be necessary for standard grammars (that have already instantiated themselves).
+    * `ƒ.new.grammar G, $` with a grammar `G` and an options POD `$` to instantiate a grammar with rules
+      as given by `G` and settings as given by `$`. This form may be used to obtain a 'parametrized
+      modification' of `G`.
+    * `ƒ.new.grammar target, G, $` with a `target` object, a grammar, and an options POD; this will
+      add missing rules from `G` to `target` and preserve existing methods there. The third argument is
+      mandatory to distinguish this signature from the one above, but may be set to `null`.
+  ###
+  switch arity = arguments.length
+    when 1 then [ target, grammar, options, ] = [ {}, target, {},      ]
+    when 2 then [ target, grammar, options, ] = [ {}, target, grammar, ]
+    when 3 then null
+    else
+      throw new Error "expected one, two or three arguments, got #{arity}"
+  ### In case `G` has a member `grammar`, use that one instead of `G` itself; this allows us to derive
+  new grammars by simply saying `ƒ.new.grammar ( require 'foo' ), options`: ###
+  grammar   = grammar[ 'grammar' ] if grammar[ 'grammar' ]?
+  # options  ?= grammar[ 'options' ]
+  target[ 'nodes' ]?= {}
+  target[ 'tests' ]?= {}
+  target[ 'options' ] = LODASH.merge ( target[ 'options' ] ? {} ), ( options ? {} ), ( grammar[ 'options' ] ? {} )
+  debug '###', ( name for name of grammar )
+  debug '###', ( name for name of grammar[ 'options' ] )
+  debug '###', ( name for name of options )
+  debug '###', ( name for name of target[ 'options' ] )
+  #.......................................................................................................
+  for member_name, member of grammar grammar target, target[ 'options' ]
+    whisper name
+  #   unless target[ member_name ]?
+  #     target[ member_name ] = member
+  # for rule_name, get_rule of library[ 'rules' ]
+  #   # throw new Error "detected" if is_reserved[ rule_name ]
+  #.......................................................................................................
+  return target
+
+#-----------------------------------------------------------------------------------------------------------
+@consolidate = ( grammar ) ->
+  # info grammar
+  grammar[ 'nodes' ]?= {}
+  grammar[ 'tests' ]?= {}
+  constructor = grammar[ 'constructor' ]
+  options     = grammar[ 'options' ] ? {}
+  throw new Error "unable to find constructor in grammar" unless TYPES.isa_function constructor
+  constructor grammar, options
+  # info 'options:', ( name for name of options )
+  for name, member of grammar
+    # info name
+    continue if name is 'constructor'
+    continue if name is 'nodes'
+    continue if name is 'tests'
+    continue if name is 'options'
+    if TYPES.isa_function member
+      grammar[ name ] = member()
+      LODASH.merge grammar[ name ], member
+      # for subname, submember of member
+      #   grammar[ name ][ subname ] = submember
 
 #===========================================================================================================
 # STANDARD PARSER API NODES
@@ -162,6 +210,15 @@ copy = ( value ) ->
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@_XXX_YYY_node = ( translator, type, subtype ) ->
+  ### TAINT method to replace `_new_node` ###
+  R =
+    type:         type
+    'x-subtype':  subtype
+    'translator': translator
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 @_traverse = ( node, handler ) ->
   ### Traverse a node and all its sub-nodes. We can't use `estraverse` for this task as it does not reliably
   iterate over non-standard nodes. ###
@@ -181,6 +238,7 @@ copy = ( value ) ->
   ### Remove references to issuing grammar from node, including nested sub-nodes; useful for testing. ###
   @_traverse node, ( sub_node ) ->
     delete sub_node[ 'x-grammar' ]
+    delete sub_node[ 'translator' ]
   return node
 
 ############################################################################################################

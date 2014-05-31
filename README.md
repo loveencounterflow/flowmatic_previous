@@ -38,18 +38,25 @@ from the
 of [Arabika](https://github.com/loveencounterflow/arabika), an experiment where i try and test
 the FlowMatic way of doing programming languages.
 
-Each FlowMatic grammar module consists of four parts:
+Each FlowMatic grammar module consists of two parts:
 
-* **`@$`**: a fallback options POD;
-* **`@rules`**: the grammar rules proper;
+* **`@options`**: a fallback options POD. The standard grammar will be produced (with `ƒ.new.consolidate`)
+  with the settings as present here.
+
+* **`@constructor`**: a function that accepts a grammar and an options POD and attaches named rules,
+  node producers, language translators, and test cases to the grammar.
+
+
+<!--
 * **`@nodes`**: methods to generate AST nodes, with
   * each method providing translators to target languages;
 * **`@tests`** which should aim to cover major parts for correct code acceptance,
   code rejection, and code translation.
+ -->
 
 We'll look at each part in turns below.
 
-I usually copy-and-paste something like the following to the top of my grammar files:
+First up, i usually copy-and-paste something like the following to the top of my grammar files:
 
 ````coffeescript
 TRM                       = require 'coffeenode-trm'
@@ -63,13 +70,8 @@ debug                     = TRM.get_logger 'debug',     badge
 warn                      = TRM.get_logger 'warn',      badge
 help                      = TRM.get_logger 'help',      badge
 #..............................................................................
-### OBS! always `require 'flowmatic'` before grammar modules! ###
 ƒ                         = require 'flowmatic'
 BNP                       = require 'coffeenode-bitsnpieces'
-TEXT                      = require './2-text'
-CHR                       = require './3-chr'
-NUMBER                    = require './4-number'
-NAME                      = require './6-name'
 ````
 
 This gives me an ample supply of logging methods with colorful outputs and a 'badge' that tells me where
@@ -82,46 +84,78 @@ dialect, you often want to change some or all of these values (or introduce your
 
 ````coffeescript
 #------------------------------------------------------------------------------
-@$ =
+@options =
   'mark':                 ':'
-  'needs-ilws-before':    no  # is throw-away whitespace necessary before `:`?
-  'needs-ilws-after':     yes # is throw-away whitespace necessary after  `:`?
+  'needs-lws-before':     no
+  'needs-lws-after':      yes
+  TEXT:                   require './2-text'
+  CHR:                    require './3-chr'
+  NUMBER:                 require './4-number'
+  NAME:                   require './6-name'
 ````
 
 In this example, since we're talking about parsing and constructing assignments, we have three settings to
-influence how assignment dialects of Arabika will work: which literal is used to 'announce the assignment'
+influence how assignment dialects of Arabika will work: which literal is used to 'announce' the assignment
 (in many languages, this would be `=`; i believe leaving the equals sign for equality testing is a better
-idea), and whether there will be mandatory (ignored) linear whitespace (that's `ilws` for short) before
-and after that literal (i like to write `a: 42` rather than `a : 42`; i also don't like forms that are
-too condensed, so `a:42` is prohibited—remember that with FlowMatic, you can always change that).—Note that
-the options as presented here are maybe not optimal as they allow to define mandatory but not optional
-whitespace. Also, we are limited to linear whitespace to separate right hand side, mark, and left hand side.
-Then again, it's probably a good idea to look for a reasonable balance between complexity and flexibility.
+idea), and whether there will be mandatory linear whitespace before and / or after the mark.
 
-After the options, **rules** rule. The `@rules` and the `@nodes` members of the `module.exports`
-object (i.e. `this == @`) are all functions that accept a grammar and an options object and return an object
-with bespoke methods (i.e. methods that honor the settings found in `$`—*not* those in `@$`, which are the
-default options and not necessarily those needed for a given dialect).
+> Note that the options as presented
+> here are maybe not optimal as they allow to define mandatory but not optional whitespace. Also, we are
+> limited to linear whitespace to separate right hand side, mark, and left hand side. Then again, it's
+> probably a good idea to look for a reasonable balance between complexity and flexibility.
+
+The next items in the options POD are sub-grammars of the language; they're put inside the options instead
+of the module level so they become configurable. When you want to produce an Arabika `assignment` dialect,
+you may call something like `ƒ.new.grammar assignment, NAME: require 'my-name-grammar'` to change the way
+variable identifiers are parsed.
+
+After the options comes the constructor.
+
 
 ````coffeescript
 #------------------------------------------------------------------------------
-@rules = ( G, $ ) ->
-  RR = {}
+@constructor = ( G, $ ) ->
+
+  #============================================================================
+  # RULES
+  #----------------------------------------------------------------------------
+  G.expression = ->
+    ### TAINT placeholder method for a more complete version of what contitutes an expression ###
+    R = ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route
 
   #----------------------------------------------------------------------------
-  RR.assignment = ->
-    if $[ 'needs-ilws-before' ]
-      R = ƒ.seq NAME.route, CHR.ilws, $[ 'mark' ], CHR.ilws, ( -> G.expression )
-    else
-      R = ƒ.seq NAME.route,           $[ 'mark' ], CHR.ilws, ( -> G.expression )
-    R = R.onMatch ( match, state ) -> G.nodes.assignment match..., state
+  G.assignment = ->
+    ilws_before = if $[ 'needs-lws-before' ] then $.CHR.ilws else ƒ.drop ''
+    ilws_after  = if $[ 'needs-lws-after'  ] then $.CHR.ilws else ƒ.drop ''
+    R = ƒ.seq $.NAME.route, ilws_before, $[ 'mark' ], ilws_after, ( -> G.expression )
+    R = R.onMatch ( match ) -> G.nodes.assignment match...
     R = R.describe 'assignment'
     return R
 
-  ### ... more rules ... ###
-
   #----------------------------------------------------------------------------
-  return RR
+  G.assignment.as =
+    coffee: ( node ) ->
+      { lhs, mark, rhs } = node
+      lhs_result  = ƒ.as.coffee lhs
+      rhs_result  = ƒ.as.coffee rhs
+      # whisper lhs_result
+      # whisper rhs_result
+      target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
+      taints      = ƒ.as._collect_taints lhs_result, rhs_result
+      whisper taints
+      return target: target, taints: taints
+
+
+  #============================================================================
+  # NODES
+  #----------------------------------------------------------------------------
+  G.nodes.assignment = ( lhs, mark, rhs ) ->
+    # R                 = ƒ.new._XXX_node G, 'Literal', 'assignment'
+    R                 = ƒ.new._XXX_YYY_node G.assignment.as, 'Literal', 'assignment'
+    R[ 'lhs'        ] = lhs
+    R[ 'mark'       ] = mark
+    R[ 'rhs'        ] = rhs
+    return R
 ````
 
 I've found this format after going through several stages of more experimental designs; basically the idea

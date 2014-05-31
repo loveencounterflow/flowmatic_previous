@@ -79,7 +79,12 @@ MULTIMIX                  = require 'coffeenode-multimix'
 
 #-----------------------------------------------------------------------------------------------------------
 @as.coffee = ( node ) ->
+  # debug '©3412', node[ 'type' ] + '/' + node[ 'x-subtype' ]
+  # debug '©3412', node[ 'x-grammar' ]?
+  # debug '©3412', node[ 'translator' ]?
+  ### TAINT call to grammar.as.coffee to be phased out ###
   return grammar.as.coffee node if ( grammar = node[ 'x-grammar' ] )?
+  return translator.coffee node if ( translator = node[ 'translator' ] )?
   type    = node[ 'type' ]
   type   += '/' + node[ 'x-subtype' ] if node[ 'x-subtype' ]?
   target  = if node[ 'value' ]? then rpr node[ 'value' ] else rpr node

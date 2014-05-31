@@ -96,7 +96,8 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
     info ( rpr nr ) + '-' + module_name
     module = require route
     #.......................................................................................................
-    unless ( TESTS = module[ '$TESTS' ] )?
+    ### TAINT reference to `$TESTS` to be removed ###
+    unless ( TESTS = module[ '$TESTS' ] ? module[ 'tests' ] )?
       miss_count += 1
       urge "no tests found for #{nr}-#{module_name} (#{route})"
       continue
@@ -110,6 +111,7 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
         fail_count += 1
         warn "#{locator}:"
         warn error[ 'message' ]
+        # warn error[ 'stack' ]
         continue
       #.....................................................................................................
       pass_count += 1
