@@ -166,14 +166,22 @@ On line #7, there's a grammar rule `_TMP_expression` defined; its funny name exp
 meant for general consumption (`_`) and to be removed later on (`TMP`). The reason is that the entire
 grammar at the stage depicted here is very much in an incipient stage; as such, there's no general rule what
 an expression constitutes, so i made one up to allow for test cases from early on. Later, that rule will be
-swapped for a more general one <sub>(the doubtlessly better way to deal with such situations is to define a
-separate grammar module that can grow as the grammar grows)</sub>.
+swapped for a more general one (doubtless, the better way to deal with such situations is to define a
+separate grammar module that can grow as the grammar grows).
 
 As it stands, an expression is defined as an alternative (`ƒ.or`) between an integer number literal, a text
 literal (a.k.a. string), or a 'route' (compound name).
 
 > Notice i changed packrattle's `alt` to `or`; i find it more descriptive (there will be some more minor API
 > changes in my [fork of packrattle](https://github.com/loveencounterflow/packrattle)).
+
+On line #13, there's a rule for what constitutes an assignment; this one is a bit more involved, so let's
+step through.—On lines #13 and #14, we avail ourselves of the two settings `$[ 'needs-lws-before' ]` and
+`$[ 'needs-lws-after'  ]` (remember `$` here stands for the actual options POD that is valid for the
+grammar we're producing; it may be different from `@options`). Based on these settings, we decide what the
+space to the left and the rigth of the assignment mark—i.e. `$[ 'mark' ] == ':'`—should look like: in
+case whitespace is being called for, that requirement is passed on to `$.CHR.ilws` (`CHR` being a module
+to handle basic character classes and `ilws` a method to recognize and *i*gnore *l*inear *w*hite*s*pace).
 
  `@rules` is expected to return an object with custom methods on it; the simplest way to define that
 is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
