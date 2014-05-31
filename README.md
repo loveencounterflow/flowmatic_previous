@@ -11,7 +11,6 @@
 		- [Constructor: Grammar Rules](#constructor-grammar-rules)
 		- [Constructor: Node Producers](#constructor-node-producers)
 	- [Dependency Ordering](#dependency-ordering)
-	- [Previous README](#previous-readme)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -266,8 +265,7 @@ indicative of NodeJS not having resolved a circular import at that point.
  -->
 
 <!--
-### Previous README
-
+> ### Previous README
 > ## TL;DR
 >
 > This document is mainly here to instill the illusion of meaningful content. Today i managed to reactivate my
