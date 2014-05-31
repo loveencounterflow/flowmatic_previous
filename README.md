@@ -163,7 +163,17 @@ underlying [packrattle](https://github.com/robey/packrattle) parser works, the r
 and #13) take on a rather declarative style. Let's walk through the code and see what it's all about.
 
 On line #7, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
-meant for general consumption (`_`) and to be removed later on (`TMP`).
+meant for general consumption (`_`) and to be removed later on (`TMP`). The reason is that the entire
+grammar at the stage depicted here is very much in an incipient stage; as such, there's no general rule what
+an expression constitutes, so i made one up to allow for test cases from early on. Later, that rule will be
+swapped for a more general one (the doubtlessly better way to deal with such situations is to define a
+separate grammar module that can grow as the grammar grows).
+
+As it stands, an expression is defined as an alternative (`ƒ.or`) between an integer number literal, a text
+literal (a.k.a. string), or a 'route' (compound name).
+
+> Notice i changed packrattle's `alt` to `or`; i find it more descriptive (there will be some more minor API
+> changes in my [fork of packrattle](https://github.com/loveencounterflow/packrattle)).
 
  `@rules` is expected to return an object with custom methods on it; the simplest way to define that
 is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
