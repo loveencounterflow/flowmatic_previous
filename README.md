@@ -130,7 +130,7 @@ with defining rules, translators, and node-producing routines:
     lws1 = if $[ 'needs-lws-before' ] then $.CHR.ilws else ƒ.drop ''             # 14
     lws2 = if $[ 'needs-lws-after'  ] then $.CHR.ilws else ƒ.drop ''             # 15
     return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
-    .onMatch ( match ) -> G.nodes.assignment match...                            # 17
+    .onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
     .describe 'assignment'                                                       # 18
                                                                                  # 19
   #============================================================================  # 20
@@ -185,96 +185,47 @@ to handle basic character classes and `ilws` a method to recognize and <b>i</b>g
 <b>w</b>hite<b>s</b>pace); in case no space is allowed, we resort to matching (and dropping) an empty
 string (which trivially always matches).
 
-**Lines 16 thru 18** build the grammar rule proper; this one is pretty condensed and uses the new dot
-notation introduced by CoffeeScript 1.7. The same expressed in CS < 1.7 is perhaps a bit easier to read:
+**Lines 16 thru 18** build the `assignment` grammar rule proper; this one is pretty condensed and uses the
+new dot notation introduced in CoffeeScript 1.7; to repeat:
 
 ```coffeescript
-R = ƒ.seq $.NAME.route, lws_before, $[ 'mark' ], lws_after, ( -> G._TEMPORARY_expression )
-R = R.onMatch ( match ) -> G.nodes.assignment match...
+    return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
+    .onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
+    .describe 'assignment'                                                       # 18
+```
+
+The same expressed in CS < 1.7 is perhaps a bit easier to read:
+
+```coffeescript
+R = ƒ.seq $.NAME.route, lws_before, $[ 'mark' ], lws_after, ( -> G._TMP_expression )
+R = R.onMatch ( match, state ) -> G.nodes.assignment match...
 R = R.describe 'assignment'
 return R
 
-This is very much the packrattle parser API at work
-
 ```
+> This is very much the packrattle parser API at work: you first instantiate a rule using one of the parser
+> methods, then you tack handlers like `onMatch` and `describe` onto it; each of these calls returns a
+> modified version of your grammar rule, so you shouldn't return the value that results from the *first* call
+> but of the *last* call, as shown above. Also, in contradistinction to some other parser combinator libraries
+> i tested, your only chance to get hold of the source is in case of a match. I'm also not sure whether i
+> like the fact that dutifully adding a descriptive description means that earlier error descriptions get
+> suppressed (i.e. if `$.NAME.route` should fail on an input you'll still only get `Expected assignment` as
+> an error description—it would be so much more helpful to see the entire chain of failure).
 
+What we do on **line #17** is we take the match (which is a list of three elements, `[ route, mark,
+expression ]`, the whitespace having been dropped) and apply to a node producer, `G.nodes.assignment` (i
+omitted the `return` statement here since this is one-liner; it is a stylistic preference). This is the code
+of the node producer again (you will notice we dever defined `G.nodes`; that part is done by FlowMatic
+behind the scenes):
 
- `@rules` is expected to return an object with custom methods on it; the simplest way to define that
-is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
-that (1) i nearly always call return values `R`, which i find helpful for reading; (2) due to CoffeeScript's
-scoping rules, the return value of the outer function must have a different name than that of any variable
-used in an inner function, so `RR` is an expedient here (btw i plan to distinguish those as `../R` and
-`./R` in Arabika to make scoping more explicit).
-
-The above snippet uses `G.nodes.assignment` to produce an AST node, so next up is that **nodes** thing. Its
-outline looks very much like that of `@rules`, above:
-
-````coffeescript
-#------------------------------------------------------------------------------
-@nodes = ( G, $ ) ->
-  RR = {}
-
-  #----------------------------------------------------------------------------
-  RR.assignment = ( lhs, mark, rhs, state ) ->
-      return ƒ.new_node G, 'assignment', state,
-        'lhs':  lhs
-        'mark': mark
-        'rhs':  rhs
-
-  #----------------------------------------------------------------------------
-  RR.assignment.as =
-    coffee: ( node ) ->
-      ### TAINT looking into reducing boilerplate especially here: ###
-      { lhs, 'x-mark': mark, rhs } = node
-      lhs_result  = ƒ.as.coffee lhs
-      rhs_result  = ƒ.as.coffee rhs
-      target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""
-      taints      = ƒ.as._collect_taints lhs_result, rhs_result
-      return target: target, taints: taints
-
-  #----------------------------------------------------------------------------
-  return RR
-````
-
-As a matter of convention, **(1)** each node producing function sees to it that a reference to the current
-grammar `G` gets recorded in each node, and **(2)** provides, under
-`G.nodes.<node-type>.as.<target-language-name>` (that's `@nodes.assignment.as.coffee` here) a method which
-is responsible for turning that specific node type into, you guessed it, (an object that represents) target
-code.
-
-Point (1) is necessary so we can keep track of translation responsibilities. After all, it is intended to
-make FlowMatic grammars so flexible they may be changed in the middle of a source file (in fact nothing
-new—you already know embedded languages from HTML that contains JavaScript and CSS), so we need a way to
-track those grammars. As for point (2), i started out with returning pure strings, but that's too inflexible
-when you want to do references to the original code and stuff like that.
-
-> In the above, we demonstrate (in
-> a somewhat wordy fashion) how to deal with 'taints', that's remarks originating in node translators when
-> code is known to be less than perfect. Using taints, we can go and produce code even with experimental
-> translation methods and warn about their flaws in the resulting target language; when translating to
-> CoffeeScript, those taints will usually get turned into `### TAINT yaddayadda ###` block comments that will
-> persist even when those CoffeeScript sources are themselves translated to JavaScript.
-
-Lastly, we have the **tests**; these are implemented as an object literal with methods. As a matter of
-style, i like my test functions to bear descriptive, readable names, for which reasons i attach them as
-quoted strings to the `@test` object.
-
-Each test function should accept a `test` argument; this is an object with methods frequently needed for
-testing (such as `test.eq` for reliable deep-equality tests, and `test.ok` to test for boolean results).
-Each method of `@test` should throw an exception when results are not up to expectations; `test.eq` and
-`test.ok` will do that for you.
-
-````coffeescript
-#------------------------------------------------------------------------------
-@tests =
-
-  #----------------------------------------------------------------------------
-  'integer: parses sequences of ASCII digits': ( test ) ->
-    test.eq ...
-
-  # ... more tests ...
-````
-
+```coffeescript
+G.nodes.assignment = ( lhs, mark, rhs ) ->                                     # 36
+  R                 = ƒ.new.node G.assignment.as, 'assignment'                 # 37
+  R[ 'lhs'        ] = lhs                                                      # 38
+  R[ 'mark'       ] = mark                                                     # 39
+  R[ 'rhs'        ] = rhs                                                      # 40
+  return R                                                                     # 41
+```
 
 ### Plain Style
 
