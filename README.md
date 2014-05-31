@@ -162,7 +162,7 @@ define a grammar inside a function that augments a target object (`G` for gramma
 underlying [packrattle](https://github.com/robey/packrattle) parser works, the rule definitions (on lines #7
 and #13) take on a rather declarative style. Let's walk through the code and see what it's all about.
 
-On line #7, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
+On **line #7**, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
 meant for general consumption (`_`) and to be removed later on (`TMP`). The reason is that the entire
 grammar at the stage depicted here is very much in an incipient stage; as such, there's no general rule what
 an expression constitutes, so i made one up to allow for test cases from early on. Later, that rule will be
@@ -175,14 +175,29 @@ literal (a.k.a. string), or a 'route' (compound name).
 > Notice i changed packrattle's `alt` to `or`; i find it more descriptive (there will be some more minor API
 > changes in my [fork of packrattle](https://github.com/loveencounterflow/packrattle)).
 
-On line #13, there's a rule for what constitutes an assignment; this one is a bit more involved, so let's
+On **line #13**, there's a rule for what constitutes an assignment; this one is a bit more involved, so let's
 step through.—On lines #13 and #14, we avail ourselves of the two settings `$[ 'needs-lws-before' ]` and
 `$[ 'needs-lws-after'  ]` (remember `$` here stands for the actual options POD that is valid for the
 grammar we're producing; it may be different from `@options`). Based on these settings, we decide what the
 space to the left and the rigth of the assignment mark—i.e. `$[ 'mark' ] == ':'`—should look like: in
 case whitespace is being called for, that requirement is passed on to `$.CHR.ilws` (`CHR` being a module
 to handle basic character classes and `ilws` a method to recognize and <b>i</b>gnore <b>l</b>inear
-<b>w</b>hite<b>s</b>pace).
+<b>w</b>hite<b>s</b>pace); in case no space is allowed, we resort to matching (and dropping) an empty
+string (which trivially always matches).
+
+**Lines 16 thru 18** build the grammar rule proper; this one is pretty condensed and uses the new dot
+notation introduced by CoffeeScript 1.7. The same expressed in CS < 1.7 is perhaps a bit easier to read:
+
+```coffeescript
+R = ƒ.seq $.NAME.route, lws_before, $[ 'mark' ], lws_after, ( -> G._TEMPORARY_expression )
+R = R.onMatch ( match ) -> G.nodes.assignment match...
+R = R.describe 'assignment'
+return R
+
+This is very much the packrattle parser API at work
+
+```
+
 
  `@rules` is expected to return an object with custom methods on it; the simplest way to define that
 is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
