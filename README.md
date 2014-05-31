@@ -10,8 +10,6 @@
 	- [Constructor](#constructor)
 		- [Constructor: Grammar Rules](#constructor-grammar-rules)
 		- [Constructor: Node Producers](#constructor-node-producers)
-	- [Plain Style](#plain-style)
-	- [Parametrized Style](#parametrized-style)
 	- [Dependency Ordering](#dependency-ordering)
 	- [Previous README](#previous-readme)
 
@@ -195,9 +193,9 @@ string (which trivially always matches).
 new dot notation introduced in CoffeeScript 1.7; to repeat:
 
 ```coffeescript
-    return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
-    .onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
-    .describe 'assignment'                                                       # 18
+return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
+.onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
+.describe 'assignment'                                                       # 18
 ```
 
 The same expressed in CS < 1.7 is perhaps a bit easier to read:
@@ -243,10 +241,7 @@ G.nodes.assignment = ( lhs, mark, rhs ) ->                                     #
   return R                                                                     # 41
 ```
 
-### Plain Style
-
-### Parametrized Style
-
+<!--
 ### Dependency Ordering
 
 When `require`ing dependencies from the same grammar, take care to `require flowmatic` *before* any of the
@@ -268,7 +263,9 @@ XRE                       = require './9-xre'
 
 `XRE` happens to be a function, but in the first case, i got an error `Object is not a function`, which is
 indicative of NodeJS not having resolved a circular import at that point.
+ -->
 
+<!--
 ### Previous README
 
 > ## TL;DR
@@ -366,3 +363,4 @@ indicative of NodeJS not having resolved a circular import at that point.
 >
 >
 >
+ -->
