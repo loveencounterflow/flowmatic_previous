@@ -4,7 +4,12 @@
 - [Synopsis](#synopsis)
 - [Examples](#examples)
 - [Testing](#testing)
-- [Building Grammars](#building-grammars)
+- [Building Grammars: A Code Walkthrough](#building-grammars-a-code-walkthrough)
+	- [Preamble](#preamble)
+	- [Options](#options)
+	- [Constructor](#constructor)
+		- [Constructor: Grammar Rules](#constructor-grammar-rules)
+		- [Constructor: Node Producers](#constructor-node-producers)
 	- [Plain Style](#plain-style)
 	- [Parametrized Style](#parametrized-style)
 	- [Dependency Ordering](#dependency-ordering)
@@ -26,11 +31,7 @@ parametrized grammar written the FlowMatic way.
 
 ## Testing
 
-## Building Grammars
-
-> **### TAINT the following principled outlines may not yet be implemented or be implemented in a slightly
-> different way; currently they are more of a blueprint how to evolve FlowMatic so that building grammars
-> becomes more straightforward and less fraught with boilerplate. ###**
+## Building Grammars: A Code Walkthrough
 
 In this section, i want to give an outline what building a FlowMatic grammar entails; as an example, i quote
 from the
@@ -43,18 +44,16 @@ Each FlowMatic grammar module consists of two parts:
 * **`@options`**: a fallback options POD. The standard grammar will be produced (with `ƒ.new.consolidate`)
   with the settings as present here.
 
-* **`@constructor`**: a function that accepts a grammar and an options POD and attaches named rules,
-  node producers, language translators, and test cases to the grammar.
-
-
-<!--
-* **`@nodes`**: methods to generate AST nodes, with
-  * each method providing translators to target languages;
-* **`@tests`** which should aim to cover major parts for correct code acceptance,
-  code rejection, and code translation.
- -->
+* **`@constructor`**: a function that accepts a grammar and an options POD and attaches
+  * named rules,
+  * node producers,
+  * language translators, and
+  * test cases
+  to the grammar.
 
 We'll look at each part in turns below.
+
+### Preamble
 
 First up, i usually copy-and-paste something like the following to the top of my grammar files:
 
@@ -78,6 +77,8 @@ This gives me an ample supply of logging methods with colorful outputs and a 'ba
 outputs come from. The `ƒ` is a handy shortcut for FlowMatic; i need it all over the place so i want to
 make that a snappy one. Also all over the place are references to the current grammar and its options,
 which are abbreviated as `G` and `$`.
+
+### Options
 
 Next up is an **options POD**, which contains all the default settings of the grammar. When defining a
 dialect, you often want to change some or all of these values (or introduce your own new rules):
@@ -108,6 +109,8 @@ The next items in the options POD are sub-grammars of the language; they're put 
 of the module level so they become configurable. When you want to produce an Arabika `assignment` dialect,
 you may call something like `ƒ.new.grammar assignment, NAME: require 'my-name-grammar'` to change the way
 variable identifiers are parsed.
+
+### Constructor
 
 After the options comes the constructor. In the code below, i've highlighted its three sections which deal
 with defining rules, translators, and node-producing routines:
@@ -162,6 +165,9 @@ define a grammar inside a function that augments a target object (`G` for gramma
 underlying [packrattle](https://github.com/robey/packrattle) parser works, the rule definitions (on lines #7
 and #13) take on a rather declarative style. Let's walk through the code and see what it's all about.
 
+
+#### Constructor: Grammar Rules
+
 On **line #7**, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
 meant for general consumption (`_`) and to be removed later on (`TMP`). The reason is that the entire
 grammar at the stage depicted here is very much in an incipient stage; as such, there's no general rule what
@@ -206,11 +212,21 @@ return R
 > This is very much the packrattle parser API at work: you first instantiate a rule using one of the parser
 > methods, then you tack handlers like `onMatch` and `describe` onto it; each of these calls returns a
 > modified version of your grammar rule, so you shouldn't return the value that results from the *first* call
-> but of the *last* call, as shown above. Also, in contradistinction to some other parser combinator libraries
+> but of the *last* call, as shown above.
+>
+> In contradistinction to some other parser combinator libraries
 > i tested, your only chance to get hold of the source is in case of a match. I'm also not sure whether i
 > like the fact that dutifully adding a descriptive description means that earlier error descriptions get
 > suppressed (i.e. if `$.NAME.route` should fail on an input you'll still only get `Expected assignment` as
 > an error description—it would be so much more helpful to see the entire chain of failure).
+>
+> At this point you maybe become a little wary of all the little things that can go wrong, and you'd be
+> right. It is exactly for this reason that i'm charting the course in so much detail here. We'll get into
+> setting up test cases in a minute; FlowMatic comes with a custom-tailored testing method that makes it
+> relatively easy to formulate and run tests. You will basically have to start out with very simple things
+> and then write and run test cases from very early on.
+
+#### Constructor: Node Producers
 
 What we do on **line #17** is we take the match (which is a list of three elements, `[ route, mark,
 expression ]`, the whitespace having been dropped) and apply to a node producer, `G.nodes.assignment` (i
