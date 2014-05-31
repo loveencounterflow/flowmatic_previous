@@ -123,7 +123,7 @@ with defining rules, translators, and node-producing routines:
   G._TMP_expression = ->                                                         #  7
     ### TAINT placeholder method for a more complete version of what contitutes  #  8
     an expression ###                                                            #  9
-    R = ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route                      # 10
+    return ƒ.or $.NUMBER.integer, $.TEXT.literal, $.NAME.route                   # 10
                                                                                  # 11
   #----------------------------------------------------------------------------  # 12
   G.assignment = ->                                                              # 13
@@ -157,8 +157,15 @@ with defining rules, translators, and node-producing routines:
     return R                                                                     # 41
 ````
 
-I've found this format after going through several stages of more experimental designs; basically the idea
-is that `@rules` is expected to return an object with custom methods on it; the simplest way to define that
+I've found this format after going through several stages of experimental designs; the basic idea is that we
+define a grammar inside a function that augments a target object (`G` for grammar). Due to the way that the
+underlying [packrattle](https://github.com/robey/packrattle) parser works, the rule definitions (on lines #7
+and #13) take on a rather declarative style. Let's walk through the code and see what it's all about.
+
+On line #7, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
+meant for general consumption (`_`) and to be removed later on (`TMP`).
+
+ `@rules` is expected to return an object with custom methods on it; the simplest way to define that
 is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
 that (1) i nearly always call return values `R`, which i find helpful for reading; (2) due to CoffeeScript's
 scoping rules, the return value of the outer function must have a different name than that of any variable
