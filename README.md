@@ -181,7 +181,8 @@ step through.—On lines #13 and #14, we avail ourselves of the two settings `$[
 grammar we're producing; it may be different from `@options`). Based on these settings, we decide what the
 space to the left and the rigth of the assignment mark—i.e. `$[ 'mark' ] == ':'`—should look like: in
 case whitespace is being called for, that requirement is passed on to `$.CHR.ilws` (`CHR` being a module
-to handle basic character classes and `ilws` a method to recognize and *i*gnore *l*inear *w*hite*s*pace).
+to handle basic character classes and `ilws` a method to recognize and *i*gnore <i>l</i>inear
+<i>w</i>hite<i>s</i>pace).
 
  `@rules` is expected to return an object with custom methods on it; the simplest way to define that
 is by giving it a snappy name and attach the methods to that object. The reason it's called `RR` here is
