@@ -366,33 +366,48 @@ continued:
 We start out by thinking up a descriptive English name for a given test case; in this case, i'd like to test
 whether the parser accepts assignments with a single name (as opposed to `compound/names` a.k.a. routes), so
 that becomes the title. I prefix the title with the name of the method about to get tested, as that will
-mesh nicely with the FlowMatic testing framework output, as will momentarily become apparent.—Note how
+mesh nicely with the FlowMatic testing framework output, as will become apparent momentarily.—Note how
 we can use `G.tests` without having to define it first; like `G.nodes`, it's provided behind the scenes.
+
+Inside the test case, we proceed by getting hold of some moving parts of our grammar; since it's up for
+configuration to choose an 'assignment mark', we cannot assume `:` here. The 'matchers' (i.e. the
+expected results of running the parser against the 'probes') will likewise have to be parametrized.
+
+> Incidentally, the code snippet above shows a somehwat outdated state of affairs as i since have moved away
+> from customized Mozilla Parser API nodes to fully custom nodes. Also note the unused `joiner` variable;
+> it denotes the character that separates the 'crumbs' that make up a 'route' (as the slash does in `foo/bar`)
+> and is obviously not needed here. It is a leftover of some extensive copy-and-paste authoring and left
+> in here as a reminder how to access settings from dependent grammar modules.
+>
+> Note that in this particular case, we're testing the current grammar; if you want to test a customized
+> grammar, see below on how to use `ƒ.new.grammar`.
 
 Each test case is expected to accept a single argument, `test`, which is an object with (currently) just
 three essential methods on it: `test.ok`, `test.fail` and `test.eq`. With `test.ok`, you test whether
 some computational result is strictly equal to `true`; `test.fail` takes a (typically anonymous) function
 and tests whether that function both fails with an exception, and whether that exception matches a RegEx
 or a string passed in as second argument. This method is just a copy of NodeJS' `assert.fail`, so you
-already know this one.
+already know it.
 
 Lastly, and the one method used above, `test.eq` tests for shallow and deep, strict equality of its two
 arguments.
 
 > When progressing with the Arabika grammar, at some point i inadvertantly committed a stupid error without
-realizing that i had obtained a value like `[ 3 ]` (list with integer) instead of the `[ '3' ]` (list with
-text) that was proscribed by the matcher of the test in question. To my amazement, `test.eq` did not
-complain, so i set out to find the source for this baffling behavior. It soon turned out that **[NodeJS
-`assert.deepEqual` is badly broken](https://github.com/joyent/node/issues/7161)**. In the
-[docs](http://nodejs.org/docs/latest/api/all.html#all_assert_deepequal_actual_expected_message) they
-assure you that `assert.deepEqual` "[t]ests for deep equality", but actually what is implemented is
-the relevant [CommonJS specs](http://wiki.commonjs.org/wiki/Unit_Testing/1.0) which not only mandate
-shallow equality tests, but are also somewhat elusive in some parts. **Do not use `assert.equal` or
-`assert.deepEqual` unless you think that `'3'` equals `3` and, worse, `[]` equals `{}` and `[{}]` equals
-`[[]]`**. I have no idea what they were thinking when writing the spec, but i have no use for that stuff.
-FlowMatic currently uses [the equals package by jkroso](https://github.com/jkroso/equals) for both
-deep and shallow, strict equality testing; it would appear to do the right thing (and it even accepts circular
-references).
+> realizing that i had obtained a value like `[ 3 ]` (list with integer) instead of the `[ '3' ]` (list with
+> text) that was proscribed by the matcher of the test in question. To my amazement, `test.eq` did not
+> complain, so i set out to find the source for this baffling behavior. It soon turned out that **[NodeJS
+> `assert.deepEqual` is badly broken](https://github.com/joyent/node/issues/7161)**. In the
+> [docs](http://nodejs.org/docs/v0.10.28/api/assert.html#assert_assert_deepequal_actual_expected_message) they
+> assure you that `assert.deepEqual` "[t]ests for deep equality", but what is actually implemented is
+> the relevant [CommonJS specs](http://wiki.commonjs.org/wiki/Unit_Testing/1.0) which not only mandate
+> shallow equality tests, but are also somewhat elusive in some parts.
+>
+> **Do not use `assert.equal` or
+> `assert.deepEqual` unless you think that `'3'` equals `3` and, worse, `[]` equals `{}` and `[{}]` equals
+> `[[]]`**. I have no idea what they were thinking when writing the spec, but i have no use for that stuff.
+> FlowMatic currently uses [the equals package by jkroso](https://github.com/jkroso/equals) for both
+> deep and shallow, strict equality testing; it would appear to do the right thing (and it even accepts circular
+> references).
 
 
 
