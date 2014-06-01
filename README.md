@@ -169,7 +169,7 @@ and #13) take on a rather declarative style. Let's walk through the code and see
 
 On **line #7**, there's a grammar rule `_TMP_expression` defined; its funny name expresses both that it's not
 meant for general consumption (`_`) and to be removed later on (`TMP`). The reason is that the entire
-grammar at the stage depicted here is very much in an incipient stage; as such, there's no general rule what
+grammar depicted here is very much in an incipient stage; as such, there's no general rule yet what
 an expression constitutes, so i made one up to allow for test cases from early on. Later, that rule will be
 swapped for a more general one (doubtless, the better way to deal with such situations is to define a
 separate grammar module that can grow as the grammar grows).
@@ -184,7 +184,7 @@ On **line #13**, there's a rule for what constitutes an assignment; this one is 
 step through.—On lines #13 and #14, we avail ourselves of the two settings `$[ 'needs-lws-before' ]` and
 `$[ 'needs-lws-after'  ]` (remember `$` here stands for the actual options POD that is valid for the
 grammar we're producing; it may be different from `@options`). Based on these settings, we decide what the
-space to the left and the rigth of the assignment mark—i.e. `$[ 'mark' ] == ':'`—should look like: in
+space to the left and the right of the assignment mark—i.e. `$[ 'mark' ] == ':'`—should look like: in
 case whitespace is being called for, that requirement is passed on to `$.CHR.ilws` (`CHR` being a module
 to handle basic character classes and `ilws` a method to recognize and <b>i</b>gnore <b>l</b>inear
 <b>w</b>hite<b>s</b>pace); in case no space is allowed, we resort to matching (and dropping) an empty
@@ -219,17 +219,28 @@ return R
 > suppressed (i.e. if `$.NAME.route` should fail on an input you'll still only get `Expected assignment` as
 > an error description—it would be so much more helpful to see the entire chain of failure).
 >
-> At this point you maybe become a little wary of all the little things that can go wrong, and you'd be
+> At this point you might become wary of all the little things that can go wrong, and you'd be
 > right. It is exactly for this reason that i'm charting the course in so much detail here. We'll get into
 > setting up test cases in a minute; FlowMatic comes with a custom-tailored testing method that makes it
 > relatively easy to formulate and run tests. You will basically have to start out with very simple things
 > and then write and run test cases from very early on.
 
+There's something to say about the `( -> G._TMP_expression )`. Firstly, the parentheses are not strictly
+needed since in this case, `-> G._TMP_expression` is the last argument of the call to `ƒ.seq`; then again,
+grammar rules often need such inline functions within chains of arguments, and it's easier and more readable
+to always add the brackets. But why is that `-> G._TMP_expression` (an inline function) instead of, plainly,
+`G._TMP_expression`? The reason is twofold. For one thing, we're defining the grammar as we go (FlowMatic
+will call each rule to obtain its return value and attach *that* to the grammar in place of the methods
+that we're seeing here), so it's conceivable that one method isn't yet there when another is being called.
+Stashing that reference inside a 'lambda function' solves that problem. For another thing, there are cases
+where you want to formulate recursive grammars (with rules that reference each other in cycles), and then
+you *must* use delayed evaluation so packrattle's caching mechanism can kick in.
+
 #### Constructor: Node Producers
 
 What we do on **line #17** is we take the match (which is a list of three elements, `[ route, mark,
-expression ]`, the whitespace having been dropped) and apply to a node producer, `G.nodes.assignment` (i
-omitted the `return` statement here since this is one-liner; it is a stylistic preference). This is the code
+expression ]`, the whitespace having been dropped) and apply it to a node producer, `G.nodes.assignment` (i
+omitted the `return` statement here since this is a one-liner; it is a stylistic preference). This is the code
 of the node producer again (you will notice we dever defined `G.nodes`; that part is done by FlowMatic
 behind the scenes):
 
