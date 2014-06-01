@@ -374,13 +374,14 @@ configuration to choose an 'assignment mark', we cannot assume `:` here. The 'ma
 expected results of running the parser against the 'probes') will likewise have to be parametrized.
 
 > Incidentally, the code snippet above shows a somehwat outdated state of affairs as i since have moved away
-> from customized Mozilla Parser API nodes to fully custom nodes. Also note the unused `joiner` variable;
-> it denotes the character that separates the 'crumbs' that make up a 'route' (as the slash does in `foo/bar`)
-> and is obviously not needed here. It is a leftover of some extensive copy-and-paste authoring and left
-> in here as a reminder how to access settings from dependent grammar modules.
+> from customized Mozilla Parser API nodes to fully customized nodes. Also note the unused `joiner` variable;
+> it is a leftover of some extensive copy-and-paste authoring and shown here as a reminder how to access
+> settings from dependent grammar modules.
 >
 > Note that in this particular case, we're testing the current grammar; if you want to test a customized
-> grammar, see below on how to use `ƒ.new.grammar`.
+> grammar, see below on how to use `ƒ.new.grammar`. When doing so, you should definitely *not* use
+> `G` and `$` inside the test case for the new grammar and options as redefining those names could interact
+> with other parts of the grammar; instead, i suggest to use something like `GG` or `G2`.
 
 Each test case is expected to accept a single argument, `test`, which is an object with (currently) just
 three essential methods on it: `test.ok`, `test.fail` and `test.eq`. With `test.ok`, you test whether
