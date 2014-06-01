@@ -100,12 +100,14 @@ copy = ( value ) ->
   throw new Error "unable to find constructor in grammar" unless TYPES.isa_function constructor
   constructor grammar, options
   # info 'options:', ( name for name of options )
+  grammar.$   = options
   for name, member of grammar
     # info name
     continue if name is 'constructor'
     continue if name is 'nodes'
     continue if name is 'tests'
     continue if name is 'options'
+    continue if name is '$'
     if TYPES.isa_function member
       grammar[ name ] = member()
       LODASH.merge grammar[ name ], member

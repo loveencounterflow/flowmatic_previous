@@ -210,9 +210,9 @@ return R
 
 ```
 > This is very much the packrattle parser API at work: you first instantiate a rule using one of the parser
-> methods, then you tack handlers like `onMatch` and `describe` onto it; each of these calls returns a
-> modified version of your grammar rule, so you shouldn't return the value that results from the *first* call
-> but of the *last* call, as shown above.
+> methods, then you tack handlers like `onMatch` and `describe` onto it. Each of these calls returns a
+> modified version of the grammar rule, so don't return the value that results from the *first* call, rather,
+> return the value from the *last* call to the API, as shown above.
 >
 > In contradistinction to some other parser combinator libraries
 > i tested, your only chance to get hold of the source is in case of a match. I'm also not sure whether i
@@ -453,8 +453,8 @@ their respective number onto the command line. In the above, we skipped everythi
 
 As a matter of convention, modules numbered `0` (zero) are considered premature or experimental and are not
 included in test runs except when tests are run with an `*` asterisk (to run everything) or a `0` (zero) (to
-also include experimental stuff). You can also inlcude (case-insensitive fragments of) module names to
-single out what tests to run, so `arabika/test exp` will run `0-EXPERIMENTS` as well as `0-MORE-EXPERIMENTS`.
+also include experimental stuff). You can also include (case-insensitive fragments of) module names, so
+e.g. `arabika/test exp` will run the tests of `0-EXPERIMENTS` as well as those of `0-MORE-EXPERIMENTS`.
 
 
 <!--
