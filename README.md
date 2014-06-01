@@ -436,6 +436,7 @@ node node_modules/flowmatic/lib/test.js $*
 which will collect test cases from the current grammar, run the tests, and report on the result. At this
 intermediary stage
 
+![](https://github.com/loveencounterflow/flowmatic/raw/master/artwork/Screen%20Shot%202014-06-01%20at%2019.39.54%20(2).png)
 
 <!--
 ### Dependency Ordering
