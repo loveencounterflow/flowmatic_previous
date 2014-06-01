@@ -265,13 +265,13 @@ hardly be omitted from the call; after all, a single grammar module is capable o
 dialects, so just pointing out, say, the name of the grammar module will not do. Anyways, having to
 explicitly mention the responsible translator does have the advantage of flexibility, as you could decide
 to not attach the translators to the parsing methods, as i have done here, but collect all translators
-of a given module in a single object and do some `switch` dispatching there; that's up to the author.
+of a given module in a single object and do some `switch` dispatching there.
 
 #### Constructor: Translators
 
-By convention, translators objects are called `as`; the have one translator method for each supported target
-language. The translator methods should be named after the conventional file extension for the respective
-language and accept a single argument, an AST `node`. Here's a general outline:
+By convention, translators objects are called `as`; they should have one translator method for each
+supported target language. Again by convention, each translator method should be named after the source file extension of
+the respective language and accept a single argument, an AST `node`. Here's a general outline:
 
 ```coffeescript
 parent_object =
