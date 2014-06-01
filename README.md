@@ -270,19 +270,29 @@ of a given module in a single object and do some `switch` dispatching there.
 #### Constructor: Translators
 
 By convention, translators objects are called `as`; they should have one translator method for each
-supported target language. Again by convention, each translator method should be named after the source file extension of
-the respective language and accept a single argument, an AST `node`. Here's a general outline:
+supported target language. Again by convention, each translator method should be named after the source file
+extension of the respective language and accept a single argument, an AST `node`. The `ast` method is
+special in that it translates not to source code, but to
+[Mozilla SpiderMonkey Parser API (MPA) nodes](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API).
+Here's a general outline:
 
 ```coffeescript
 parent_object =
   ...
   as:
-    coffee: ( node ) -> ...     # translator for CoffeeScript
-    js:     ( node ) -> ...     # translator for JavaScript
-    ast:    ( node ) -> ...     # translator for Mozilla Parser API nodes
-    py:     ( node ) -> ...     # translator for Python
+    coffee: ( node ) -> ...     # translates to CoffeeScript
+    js:     ( node ) -> ...     # translates to JavaScript
+    ast:    ( node ) -> ...     # translates to Mozilla Parser API nodes
+    py:     ( node ) -> ...     # translates to Python
 ```
 
+> I first thought it would be a great idea to produce only MPA-compatible nodes as it would then be possible
+to use such great tools as
+[esprima](http://esprima.org)
+[estraverse](https://github.com/Constellation/estraverse)
+[esquery](https://github.com/jrfeenst/esquery)
+and
+[escodegen](https://github.com/Constellation/escodegen)
 
 #### Constructor: Test Cases
 
