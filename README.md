@@ -326,6 +326,23 @@ anything, and should not necessarily get translated as a JS decimal integer lite
 
 #### Constructor: Test Cases
 
+Last but by no means least in this section are the test cases. I've already alluded to the fact that
+the packrattle parser has both a somewhat unusual API and a tendency to cover up errors. For example, if on
+**line #17** we insert a reference to an undefined variable `xxx`, making that line read
+`.onMatch ( match, state ) -> xxx; G.nodes.assignment state, match...` (which is very obviously a bug),
+then doing `G.assignment.run 'x: 42'` will fail... with an error message to the effect that 'an assignment
+was expected'! Not a *word* about there being a bogus variable in the code!
+
+To mitigate this situation, i
+[added an error stack printout](https://github.com/loveencounterflow/coffeenode-packrattle/blob/master/src/packrattle/parser.coffee#L166)
+in [my packrattle fork](https://github.com/loveencounterflow/coffeenode-packrattle)
+as a quick fix; a more thorough solution could be to allow just one specific class of errors to pass as
+parser failure signals; as it stands, a huge class of error conditions masquerade as 'sorry can't parse this'
+messages, making things difficult to handle.
+
+
+
+
 
 <!--
 ### Dependency Ordering
