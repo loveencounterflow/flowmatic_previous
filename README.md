@@ -258,13 +258,31 @@ G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              #
 ```
 
 This code is quite straightforward and should need little explanation; we call a generic `ƒ.new.node`
-method, passing in a translator and a node type; then, we add pertinent attributes (`lhs`, `mark`, `rhs`)
-to it. In a later stage of the grammar, the `state` argument should probably be included. The reference
-to the translator object looks a bit like code repetition, but can hardly be omitted from the call; after
-all, a single grammar module is capable of producing a range of dialects, so just pointing out, say, the
-name of the grammar module will not do.
+method, passing in a translator, the state object, a node type, and, finally, a `details` POD that contains
+pertinent attributes (`lhs`, `mark`, `rhs`); the attributes of the latter argument will become attributes of
+the resulting node. The reference to the translator object is a somewhat deplorable duplication, but can
+hardly be omitted from the call; after all, a single grammar module is capable of producing a range of
+dialects, so just pointing out, say, the name of the grammar module will not do. Anyways, having to
+explicitly mention the responsible translator does have the advantage of flexibility, as you could decide
+to not attach the translators to the parsing methods, as i have done here, but collect all translators
+of a given module in a single object and do some `switch` dispatching there; that's up to the author.
 
 #### Constructor: Translators
+
+By convention, translators objects are called `as`; the have one translator method for each supported target
+language. The translator methods should be named after the conventional file extension for the respective
+language and accept a single argument, an AST `node`. Here's a general outline:
+
+```coffeescript
+parent_object =
+  ...
+  as:
+    coffee: ( node ) -> ...     # translator for CoffeeScript
+    js:     ( node ) -> ...     # translator for JavaScript
+    ast:    ( node ) -> ...     # translator for Mozilla Parser API nodes
+    py:     ( node ) -> ...     # translator for Python
+```
+
 
 #### Constructor: Test Cases
 
