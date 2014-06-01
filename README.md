@@ -12,6 +12,7 @@
 		- [Constructor: Node Producers](#constructor-node-producers)
 		- [Constructor: Translators](#constructor-translators)
 		- [Constructor: Test Cases](#constructor-test-cases)
+			- [Running Tests](#running-tests)
 	- [Dependency Ordering](#dependency-ordering)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -342,7 +343,7 @@ messages, making debugging a real head-scratcher at times.
 
 Under these conditions, fine-grained yet painless and continuously exercised testing is of paramount
 importance. It's a good idea anyhow in any software of appreciable complexity, so let's look at how testing
-are implemented in FlowMatic. Here's some code from the same module as the snippets above, with line numbers
+is implemented in FlowMatic. Here's some code from the same module as the snippets above, with line numbers
 continued:
 
 ```coffeescript
@@ -389,6 +390,11 @@ removes that bit and allows for reliable equality testing.
 > grammar, see below on how to use `ƒ.new.grammar`. When doing so, you should definitely *not* use
 > `G` and `$` for the new grammar and options as redefining those names could interact
 > with other parts of the grammar. Instead, i suggest to use something like `GG` or `G2`.
+>
+> BTW, i also left in the commented `debug JSON.stringify result` which i often use to print out the
+> actual result of an operation. I proof-read the output and, when i'm convinced it's correct, i
+> copy-and-paste the output into the test case as a matcher. This is much simpler than formulating
+> lengthy object literals from the top of your head.
 
 Each test case is expected to accept a single argument, `test`, which is an object with (currently) just
 three essential methods on it: `test.ok`, `test.fail` and `test.eq`. With `test.ok`, you test whether
@@ -417,6 +423,18 @@ arguments.
 > deep and shallow, strict equality testing; it would appear to do the right thing (and it even accepts circular
 > references).
 
+##### Running Tests
+
+To simplify running tests, i put a
+[bash `test` script](https://github.com/loveencounterflow/arabika/blob/master/test)
+inside the Arabika package folder. Its significant line is (apart from `cd`ing into the Arabika directory)
+
+```bash
+node node_modules/flowmatic/lib/test.js $*
+```
+
+which will collect test cases from the current grammar, run the tests, and report on the result. At this
+intermediary stage
 
 
 <!--
