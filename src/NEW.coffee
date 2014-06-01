@@ -210,12 +210,13 @@ copy = ( value ) ->
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_XXX_YYY_node = ( translator, type, subtype ) ->
+@_XXX_YYY_node = ( translator, state, subtype, details ) ->
   ### TAINT method to replace `_new_node` ###
   R =
-    type:         type
+    type:         'Literal'
     'x-subtype':  subtype
     'translator': translator
+  LODASH.merge R, details if details?
   return R
 
 #-----------------------------------------------------------------------------------------------------------

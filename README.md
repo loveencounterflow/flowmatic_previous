@@ -10,6 +10,8 @@
 	- [Constructor](#constructor)
 		- [Constructor: Grammar Rules](#constructor-grammar-rules)
 		- [Constructor: Node Producers](#constructor-node-producers)
+		- [Constructor: Translators](#constructor-translators)
+		- [Constructor: Test Cases](#constructor-test-cases)
 	- [Dependency Ordering](#dependency-ordering)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -132,7 +134,7 @@ with defining rules, translators, and node-producing routines:
     lws1 = if $[ 'needs-lws-before' ] then $.CHR.ilws else ƒ.drop ''             # 14
     lws2 = if $[ 'needs-lws-after'  ] then $.CHR.ilws else ƒ.drop ''             # 15
     return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
-    .onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
+    .onMatch ( match, state ) -> G.nodes.assignment state, match...              # 17
     .describe 'assignment'                                                       # 18
                                                                                  # 19
   #============================================================================  # 20
@@ -151,12 +153,11 @@ with defining rules, translators, and node-producing routines:
   #============================================================================  # 33
   # NODES                                                                        # 34
   #----------------------------------------------------------------------------  # 35
-  G.nodes.assignment = ( lhs, mark, rhs ) ->                                     # 36
-    R                 = ƒ.new.node G.assignment.as, 'assignment'                 # 37
-    R[ 'lhs'        ] = lhs                                                      # 38
-    R[ 'mark'       ] = mark                                                     # 39
-    R[ 'rhs'        ] = rhs                                                      # 40
-    return R                                                                     # 41
+  G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 36
+    return ƒ.new.node G.assignment.as, state, 'assignment',                      # 37
+      'lhs':    lhs                                                              # 38
+      'mark':   mark                                                             # 39
+      'rhs':    rhs                                                              # 40
 ````
 
 I've found this format after going through several stages of experimental designs; the basic idea is that we
@@ -195,7 +196,7 @@ new dot notation introduced in CoffeeScript 1.7; to repeat:
 
 ```coffeescript
 return ƒ.seq $.NAME.route, lws1, $[ 'mark' ], lws2, ( -> G._TMP_expression ) # 16
-.onMatch ( match, state ) -> G.nodes.assignment match...                     # 17
+.onMatch ( match, state ) -> G.nodes.assignment state, match...              # 17
 .describe 'assignment'                                                       # 18
 ```
 
@@ -203,7 +204,7 @@ The same expressed in CS < 1.7 is perhaps a bit easier to read:
 
 ```coffeescript
 R = ƒ.seq $.NAME.route, lws_before, $[ 'mark' ], lws_after, ( -> G._TMP_expression )
-R = R.onMatch ( match, state ) -> G.nodes.assignment match...
+R = R.onMatch ( match, state ) -> G.nodes.assignment state, match...
 R = R.describe 'assignment'
 return R
 
@@ -239,19 +240,34 @@ cycles), and then you *must* use delayed evaluation so packrattle's caching mech
 #### Constructor: Node Producers
 
 What we do on **line #17** is we take the match (which is a list of three elements, `[ route, mark,
-expression ]`, the whitespace having been dropped) and apply it to a node producer, `G.nodes.assignment` (i
-omitted the `return` statement here since this is a one-liner; it is a stylistic preference). This is the code
-of the node producer again (you will notice we dever defined `G.nodes`; that part is done by FlowMatic
-behind the scenes):
+expression ]`, the intermittent whitespace having been dropped) and apply it to a node producer: `.onMatch (
+match, state ) -> G.nodes.assignment match...` (i omitted the `return` statement here since this is a one-
+liner; it is a stylistic preference). We just produce a node here and return it; in a more elaborate
+grammar, this would be a good moment to pick the location info from the `state` object and preserve it in
+the AST node we're producing; i've left that task for later.
+
+This is the code of the node producer again (you will notice we never defined `G.nodes`; that part is done
+by FlowMatic behind the scenes):
 
 ```coffeescript
-G.nodes.assignment = ( lhs, mark, rhs ) ->                                     # 36
-  R                 = ƒ.new.node G.assignment.as, 'assignment'                 # 37
-  R[ 'lhs'        ] = lhs                                                      # 38
-  R[ 'mark'       ] = mark                                                     # 39
-  R[ 'rhs'        ] = rhs                                                      # 40
-  return R                                                                     # 41
+G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 36
+  return ƒ.new.node G.assignment.as, state, 'assignment',                      # 37
+    'lhs':    lhs                                                              # 38
+    'mark':   mark                                                             # 39
+    'rhs':    rhs                                                              # 40
 ```
+
+This code is quite straightforward and should need little explanation; we call a generic `ƒ.new.node`
+method, passing in a translator and a node type; then, we add pertinent attributes (`lhs`, `mark`, `rhs`)
+to it. In a later stage of the grammar, the `state` argument should probably be included. The reference
+to the translator object looks a bit like code repetition, but can hardly be omitted from the call; after
+all, a single grammar module is capable of producing a range of dialects, so just pointing out, say, the
+name of the grammar module will not do.
+
+#### Constructor: Translators
+
+#### Constructor: Test Cases
+
 
 <!--
 ### Dependency Ordering
