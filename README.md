@@ -330,17 +330,69 @@ Last but by no means least in this section are the test cases. I've already allu
 the packrattle parser has both a somewhat unusual API and a tendency to cover up errors. For example, if on
 **line #17** we insert a reference to an undefined variable `xxx`, making that line read
 `.onMatch ( match, state ) -> xxx; G.nodes.assignment state, match...` (which is very obviously a bug),
-then doing `G.assignment.run 'x: 42'` will fail... with an error message to the effect that 'an assignment
+then `G.assignment.run 'x: 42'` will fail... with an error message to the effect that 'an assignment
 was expected'! Not a *word* about there being a bogus variable in the code!
 
 To mitigate this situation, i
 [added an error stack printout](https://github.com/loveencounterflow/coffeenode-packrattle/blob/master/src/packrattle/parser.coffee#L166)
-in [my packrattle fork](https://github.com/loveencounterflow/coffeenode-packrattle)
+to [my packrattle fork](https://github.com/loveencounterflow/coffeenode-packrattle)
 as a quick fix; a more thorough solution could be to allow just one specific class of errors to pass as
 parser failure signals; as it stands, a huge class of error conditions masquerade as 'sorry can't parse this'
-messages, making things difficult to handle.
+messages, making debugging a real head-scratcher at times.
 
+Under these conditions, fine-grained yet painless and continuously exercised testing is of paramount
+importance. It's a good idea anyhow in any software of appreciable complexity, so let's look at how testing
+are implemented in FlowMatic. Here's some code from the same module as the snippets above, with line numbers
+continued:
 
+```coffeescript
+  #============================================================================   # 42
+  # TESTS                                                                         # 43
+  #----------------------------------------------------------------------------   # 44
+  G.tests[ 'assignment: accepts assignment with name' ] = ( test ) ->             # 45
+    joiner  = $.NAME.$[ 'crumb/joiner' ]                                          # 46
+    mark    = $[ 'mark' ]                                                         # 47
+    probes_and_matchers  = [                                                      # 48
+      [ "abc#{mark} 42", {"type":"Literal","x-subtype":"assignment",...           # 49
+      [ "𠀁#{mark} '42'", {"type":"Literal","x-subtype":"assignment",...           # 50
+      ]                                                                           # 51
+    #..........................................................................   # 52
+    for [ probe, matcher, ] in probes_and_matchers                                # 53
+      result = ƒ.new._delete_grammar_references G.assignment.run probe            # 54
+      # debug JSON.stringify result                                               # 55
+      test.eq result, matcher                                                     # 56
+```
+
+We start out by thinking up a descriptive English name for a given test case; in this case, i'd like to test
+whether the parser accepts assignments with a single name (as opposed to `compound/names` a.k.a. routes), so
+that becomes the title. I prefix the title with the name of the method about to get tested, as that will
+mesh nicely with the FlowMatic testing framework output, as will momentarily become apparent.—Note how
+we can use `G.tests` without having to define it first; like `G.nodes`, it's provided behind the scenes.
+
+Each test case is expected to accept a single argument, `test`, which is an object with (currently) just
+three essential methods on it: `test.ok`, `test.fail` and `test.eq`. With `test.ok`, you test whether
+some computational result is strictly equal to `true`; `test.fail` takes a (typically anonymous) function
+and tests whether that function both fails with an exception, and whether that exception matches a RegEx
+or a string passed in as second argument. This method is just a copy of NodeJS' `assert.fail`, so you
+already know this one.
+
+Lastly, and the one method used above, `test.eq` tests for shallow and deep, strict equality of its two
+arguments.
+
+> When progressing with the Arabika grammar, at some point i inadvertantly committed a stupid error without
+realizing that i had obtained a value like `[ 3 ]` (list with integer) instead of the `[ '3' ]` (list with
+text) that was proscribed by the matcher of the test in question. To my amazement, `test.eq` did not
+complain, so i set out to find the source for this baffling behavior. It soon turned out that **[NodeJS
+`assert.deepEqual` is badly broken](https://github.com/joyent/node/issues/7161)**. In the
+[docs](http://nodejs.org/docs/latest/api/all.html#all_assert_deepequal_actual_expected_message) they
+assure you that `assert.deepEqual` "[t]ests for deep equality", but actually what is implemented is
+the relevant [CommonJS specs](http://wiki.commonjs.org/wiki/Unit_Testing/1.0) which not only mandate
+shallow equality tests, but are also somewhat elusive in some parts. **Do not use `assert.equal` or
+`assert.deepEqual` unless you think that `'3'` equals `3` and, worse, `[]` equals `{}` and `[{}]` equals
+`[[]]`**. I have no idea what they were thinking when writing the spec, but i have no use for that stuff.
+FlowMatic currently uses [the equals package by jkroso](https://github.com/jkroso/equals) for both
+deep and shallow, strict equality testing; it would appear to do the right thing (and it even accepts circular
+references).
 
 
 

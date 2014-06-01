@@ -49,12 +49,12 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
     throw new Error "not equal: \n#{( rpr p for p in P ).join '\n'}" unless BNP.equals P...
     # throw new Error "not equal: \n#{( JSON.stringify p for p in P ).join '\n'}" unless r
 
-  #---------------------------------------------------------------------------------------------------------
-  as_js: ( node ) =>
-    ### Given a SpiderMonkey Parser API-compliant `node` object, returns the corresponding JavaScript
-    source code as results from applying EsCodeGen (with the settings as detailed in `options.coffee`);
-    this is handy to do a quick sanity check on expected translation results. ###
-    return ESCODEGEN.generate node, escodegen_options
+  # #---------------------------------------------------------------------------------------------------------
+  # as_js: ( node ) =>
+  #   ### Given a SpiderMonkey Parser API-compliant `node` object, returns the corresponding JavaScript
+  #   source code as results from applying EsCodeGen (with the settings as detailed in `options.coffee`);
+  #   this is handy to do a quick sanity check on expected translation results. ###
+  #   return ESCODEGEN.generate node, escodegen_options
 
   #---------------------------------------------------------------------------------------------------------
   throws: assert.throws.bind assert
