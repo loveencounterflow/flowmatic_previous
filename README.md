@@ -299,7 +299,7 @@ are not nested in precisely the proscribed fashion. As an example, this means th
 a working AST for, say, (JS) `foo[ 'bar' ][ 'baz' ]` ≙ (Arabika) `foo/bar/baz`, using MPA mandates the
 following nested object:
 
-```json
+```js
   { type: 'MemberExpression',
     computed: true,
     object:
@@ -310,7 +310,7 @@ following nested object:
     property: { type: 'Literal', value: 'baz', raw: '\'baz\'' } }
 ```
 
-```json
+```js
 { type: 'route',
   subtype: 'relative',
   value:
