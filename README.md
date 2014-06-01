@@ -292,7 +292,33 @@ to use such great tools as
 [estraverse](https://github.com/Constellation/estraverse)
 [esquery](https://github.com/jrfeenst/esquery)
 and
-[escodegen](https://github.com/Constellation/escodegen)
+[escodegen](https://github.com/Constellation/escodegen) to transform nodes and produce source code. However,
+i realized that while it is well possible to produce custom nodes (with extra attributes) and produce
+arbitrary target code (with escodegen's `verbatim` feature), said tools seem to have a hard time when nodes
+are not nested in precisely the proscribed fashion. As an example, this means that in order to produce
+a working AST for, say, (JS) `foo[ 'bar' ][ 'baz' ]` ≙ (Arabika) `foo/bar/baz`, using MPA mandates the
+following nested object:
+
+```json
+  { type: 'MemberExpression',
+    computed: true,
+    object:
+     { type: 'MemberExpression',
+       computed: true,
+       object: { type: 'Identifier', name: 'foo' },
+       property: { type: 'Literal', value: 'bar', raw: '\'bar\'' } },
+    property: { type: 'Literal', value: 'baz', raw: '\'baz\'' } }
+```
+
+```json
+{ type: 'route',
+  subtype: 'relative',
+  value:
+   [ { type: 'identifier', name: 'foo' },
+     { type: 'identifier', name: 'bar' },
+     { type: 'identifier', name: 'baz' } ] }
+```
+
 
 #### Constructor: Test Cases
 
