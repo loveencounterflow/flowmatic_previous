@@ -42,10 +42,12 @@ Each FlowMatic grammar module consists of two parts:
   with the settings as present here.
 
 * **`@constructor`**: a function that accepts a grammar and an options POD and attaches
+
   * named rules,
   * node producers,
   * language translators, and
   * test cases
+
   to the grammar.
 
 We'll look at each part in turns below.
