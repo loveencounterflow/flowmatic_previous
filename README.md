@@ -442,13 +442,20 @@ screenshot shows about every aspect of the testing suite output:
 ![](https://github.com/loveencounterflow/flowmatic/raw/master/artwork/Screen%20Shot%202014-06-01%20at%2019.39.54%20(2).png)
 
 The color scheme is simple: **green** is OK, **amber** is a flaw (missing test cases), **red** is an error,
-**blue** is general info, and **grey** are asides.
+**blue** is general info, and **grey** are asides (for diagnostic messages, especially for reporting on
+skipped modules).
 
-FlowMatic [encourages numbering of partial grammars](http://en.wikipedia.org/wiki/Wikipedia:Citation_needed)
+FlowMatic [encourages numbering of partial grammars](http://imgs.xkcd.com/comics/wikipedian_protester.png)
 as a way to organize parsers; one upshot of that is you can select partial grammars for testing by putting
 their respective number onto the command line. In the above, we skipped everything except 4 out of
 14 modules; however, one module had no test cases, so 3 modules remain. In those 3 modules, there were
 21 test cases, which all performed dandy save one.
+
+As a matter of convention, modules numbered `0` (zero) are considered premature or experimental and are not
+included in test runs except when tests are run with an `*` asterisk (to run everything) or a `0` (zero) (to
+also include experimental stuff). You can also inlcude (case-insensitive fragments of) module names to
+single out what tests to run, so `arabika/test exp` will run `0-EXPERIMENTS` as well as `0-MORE-EXPERIMENTS`.
+
 
 <!--
 ### Dependency Ordering
