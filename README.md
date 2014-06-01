@@ -373,6 +373,13 @@ Inside the test case, we proceed by getting hold of some moving parts of our gra
 configuration to choose an 'assignment mark', we cannot assume `:` here. The 'matchers' (i.e. the
 expected results of running the parser against the 'probes') will likewise have to be parametrized.
 
+An additional catch is betrayed by that incantation, `ƒ.new._delete_grammar_references`, which is a
+makeshift solution to the problem that it could be hard to reliably test for two function objects being
+'sufficiently equal' to stand a general test; remember we made it so our
+[node producers](https://github.com/loveencounterflow/flowmatic#constructor-node-producers) record the very
+object that will have to be used for source translation inside the node. `_delete_grammar_references`
+removes that bit and allows for reliable equality testing.
+
 > Incidentally, the code snippet above shows a somehwat outdated state of affairs as i since have moved away
 > from customized Mozilla Parser API nodes to fully customized nodes. Also note the unused `joiner` variable;
 > it is a leftover of some extensive copy-and-paste authoring and shown here as a reminder how to access
@@ -380,8 +387,8 @@ expected results of running the parser against the 'probes') will likewise have 
 >
 > Note that in this particular case, we're testing the current grammar; if you want to test a customized
 > grammar, see below on how to use `ƒ.new.grammar`. When doing so, you should definitely *not* use
-> `G` and `$` inside the test case for the new grammar and options as redefining those names could interact
-> with other parts of the grammar; instead, i suggest to use something like `GG` or `G2`.
+> `G` and `$` for the new grammar and options as redefining those names could interact
+> with other parts of the grammar. Instead, i suggest to use something like `GG` or `G2`.
 
 Each test case is expected to accept a single argument, `test`, which is an object with (currently) just
 three essential methods on it: `test.ok`, `test.fail` and `test.eq`. With `test.ok`, you test whether
