@@ -147,17 +147,16 @@ with defining rules, translators, and node-producing routines:
       rhs_result  = ƒ.as.coffee rhs                                              # 27
       target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""  # 28
       taints      = ƒ.as._collect_taints lhs_result, rhs_result                  # 29
-      whisper taints                                                             # 30
-      return target: target, taints: taints                                      # 31
-                                                                                 # 32
-  #============================================================================  # 33
-  # NODES                                                                        # 34
-  #----------------------------------------------------------------------------  # 35
-  G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 36
-    return ƒ.new.node G.assignment.as, state, 'assignment',                      # 37
-      'lhs':    lhs                                                              # 38
-      'mark':   mark                                                             # 39
-      'rhs':    rhs                                                              # 40
+      return target: target, taints: taints                                      # 30
+                                                                                 # 31
+  #============================================================================  # 32
+  # NODES                                                                        # 33
+  #----------------------------------------------------------------------------  # 34
+  G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 35
+    return ƒ.new.node G.assignment.as, state, 'assignment',                      # 36
+      'lhs':    lhs                                                              # 37
+      'mark':   mark                                                             # 38
+      'rhs':    rhs                                                              # 39
 ````
 
 I've found this format after going through several stages of experimental designs; the basic idea is that we
@@ -250,11 +249,11 @@ This is the code of the node producer again (you will notice we never defined `G
 by FlowMatic behind the scenes):
 
 ```coffeescript
-G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 36
-  return ƒ.new.node G.assignment.as, state, 'assignment',                      # 37
-    'lhs':    lhs                                                              # 38
-    'mark':   mark                                                             # 39
-    'rhs':    rhs                                                              # 40
+G.nodes.assignment = ( state, lhs, mark, rhs ) ->                              # 35
+  return ƒ.new.node G.assignment.as, state, 'assignment',                      # 36
+    'lhs':    lhs                                                              # 37
+    'mark':   mark                                                             # 38
+    'rhs':    rhs                                                              # 39
 ```
 
 This code is quite straightforward and should need little explanation; we call a generic `ƒ.new.node`
@@ -274,6 +273,7 @@ supported target language. Again by convention, each translator method should be
 extension of the respective language and accept a single argument, an AST `node`. The `ast` method is
 special in that it translates not to source code, but to
 [Mozilla SpiderMonkey Parser API (MPA) nodes](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API).
+
 Here's a general outline:
 
 ```coffeescript
@@ -285,6 +285,41 @@ parent_object =
     ast:    ( node ) -> ...     # translates to Mozilla Parser API nodes
     py:     ( node ) -> ...     # translates to Python
 ```
+
+And here's the single method we've implemented:
+
+```coffeescript
+G.assignment.as =                                                              # 23
+  coffee: ( node ) ->                                                          # 24
+    { lhs, mark, rhs } = node                                                  # 25
+    lhs_result  = ƒ.as.coffee lhs                                              # 26
+    rhs_result  = ƒ.as.coffee rhs                                              # 27
+    target      = """#{lhs_result[ 'target' ]} = #{rhs_result[ 'target' ]}"""  # 28
+    taints      = ƒ.as._collect_taints lhs_result, rhs_result                  # 29
+    return target: target, taints: taints                                      # 30
+```
+
+On **line #25**, we assume that `node` is indeed an assignment node (there could conceivably be some type
+checking at this point). Then, we ask FlowMatic to dispatch both the left hand and the right hand side of
+the assignment to their respective translators. Translators are expected to return an object that contains
+a `target` member (with the target source text) and a `taints` member (which is an object whose keys
+collect remarks about possible code defects). This API is very new and should be regarded experimental;
+i'll have to use it a bit more to see in which direction to go and how its usage may be simplified; for my taste,
+there are too many technical details and too much boilerplate in the above. Ideally i'd just build
+a target source string and leave it at that. As for the taints, they do seem to work; at present,
+
+```coffeescript
+foo/bar/baz: 42
+```
+
+is rendered as
+
+```coffeescript
+### unable to find translator for Literal/integer ###
+$FM[ 'scope' ][ 'foo' ][ 'bar' ][ 'baz' ] = 42
+```
+
+
 #### Constructor: Test Cases
 
 
