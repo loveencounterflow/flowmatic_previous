@@ -228,13 +228,13 @@ return R
 There's something to say about the `( -> G._TMP_expression )`. Firstly, the parentheses are not strictly
 needed since in this case, `-> G._TMP_expression` is the last argument of the call to `ƒ.seq`; then again,
 grammar rules often need such inline functions within chains of arguments, and it's easier and more readable
-to always add the brackets. But why is that `-> G._TMP_expression` (an inline function) instead of, plainly,
-`G._TMP_expression`? The reason is twofold. For one thing, we're defining the grammar as we go (FlowMatic
-will call each rule to obtain its return value and attach *that* to the grammar in place of the methods
-that we're seeing here), so it's conceivable that one method isn't yet there when another is being called.
-Stashing that reference inside a 'lambda function' solves that problem. For another thing, there are cases
-where you want to formulate recursive grammars (with rules that reference each other in cycles), and then
-you *must* use delayed evaluation so packrattle's caching mechanism can kick in.
+to always add the brackets. But why is that `-> G._TMP_expression` (an inline function) necessary at all
+instead of, plainly, `G._TMP_expression`? The reason is twofold. For one thing, we're defining the grammar
+as we go (FlowMatic will call each rule to obtain its return value and attach *that* to the grammar in place
+of the methods that we're seeing here), so it's conceivable that one method isn't yet there when another is
+being called. Stashing that reference inside a 'lambda function' solves that problem. For another thing,
+there are cases where you want to formulate recursive grammars (with rules that reference each other in
+cycles), and then you *must* use delayed evaluation so packrattle's caching mechanism can kick in.
 
 #### Constructor: Node Producers
 
