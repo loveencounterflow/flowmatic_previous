@@ -301,12 +301,12 @@ G.assignment.as =                                                              #
 
 On **line #25**, we assume that `node` is indeed an assignment node (there could conceivably be some type
 checking at this point). Then, we ask FlowMatic to dispatch both the left hand and the right hand side of
-the assignment to their respective translators. Translators are expected to return an object that contains
-a `target` member (with the target source text) and a `taints` member (which is an object whose keys
-collect remarks about possible code defects). This API is very new and should be regarded experimental;
-i'll have to use it a bit more to see in which direction to go and how its usage may be simplified; for my taste,
-there are too many technical details and too much boilerplate in the above. Ideally i'd just build
-a target source string and leave it at that. As for the taints, they do seem to work; at present,
+the assignment to their respective translators. Translators are expected to return an object that contains a
+`target` member (with the target source text) and a `taints` member (which is an object whose keys collect
+remarks about possible code defects). This API is very new and should be regarded experimental; i'll have to
+use it a bit more to see in which direction to go and how its usage may be simplified; for my taste, there
+are too many technical details and too much boilerplate in the above. Ideally i'd just build a target source
+string and leave it at that. As for the taints, they do seem to work; at present,
 
 ```coffeescript
 foo/bar/baz: 42
@@ -315,10 +315,14 @@ foo/bar/baz: 42
 is rendered as
 
 ```coffeescript
-### unable to find translator for Literal/integer ###
+### unable to find translator for integer ###
 $FM[ 'scope' ][ 'foo' ][ 'bar' ][ 'baz' ] = 42
 ```
 
+which tells us that while Arabika `42` was correctly turned into CS `42` by a generic value renderer
+(basically, NodeJS `util.inspect`), the resulting form might have been just as well wrong, as there was no
+specific renderer found (after all, in a given unknown programming language, the digits `42` could stand for
+anything, and should not necessarily get translated as a JS decimal integer literal).
 
 #### Constructor: Test Cases
 
