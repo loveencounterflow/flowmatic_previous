@@ -433,10 +433,22 @@ inside the Arabika package folder. Its significant line is (apart from `cd`ing i
 node node_modules/flowmatic/lib/test.js $*
 ```
 
-which will collect test cases from the current grammar, run the tests, and report on the result. At this
-intermediary stage
+which will collect test cases from the current grammar, run the tests, and report on the results. Here is a
+screenshot what the output may look like; the command line was `arabika/test 10 2 6 5`. I deliberately
+used the `debug` (see [above](https://github.com/loveencounterflow/flowmatic#preamble)) method to print
+some informative data in the middle of testing, and made it so there is a failure in the tests, so the
+screenshot shows about every aspect of the testing suite output:
 
 ![](https://github.com/loveencounterflow/flowmatic/raw/master/artwork/Screen%20Shot%202014-06-01%20at%2019.39.54%20(2).png)
+
+The color scheme is simple: **green** is OK, **amber** is a flaw (missing test cases), **red** is an error,
+**blue** is general info, and **grey** are asides.
+
+FlowMatic [encourages numbering of partial grammars](http://en.wikipedia.org/wiki/Wikipedia:Citation_needed)
+as a way to organize parsers; one upshot of that is you can select partial grammars for testing by putting
+their respective number onto the command line. In the above, we skipped everything except 4 out of
+14 modules; however, one module had no test cases, so 3 modules remain. In those 3 modules, there were
+21 test cases, which all performed dandy save one.
 
 <!--
 ### Dependency Ordering
