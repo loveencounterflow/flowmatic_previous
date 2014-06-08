@@ -212,12 +212,11 @@ copy = ( value ) ->
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_XXX_YYY_node = ( translator, state, subtype, details ) ->
+@_XXX_YYY_node = ( translator, state, type, details ) ->
   ### TAINT method to replace `_new_node` ###
   R =
-    type:         'Literal'
-    'x-subtype':  subtype
-    'translator': translator
+    type:           type
+    '%translator':  translator
   LODASH.merge R, details if details?
   return R
 
@@ -239,9 +238,14 @@ copy = ( value ) ->
 #-----------------------------------------------------------------------------------------------------------
 @_delete_grammar_references = ( node ) ->
   ### Remove references to issuing grammar from node, including nested sub-nodes; useful for testing. ###
+  ### TAINT fails to catch all subnodes; consider using CND Bits'N'Pieces traversal ###
+      # FILLIN                    = require 'coffeenode-fillin'
+      # FILLIN.walk_containers_crumbs_and_values result, ( error, container, crumbs, value ) ->
+      #   debug crumbs.join '/' if crumbs?
   @_traverse node, ( sub_node ) ->
     delete sub_node[ 'x-grammar' ]
     delete sub_node[ 'translator' ]
+    delete sub_node[ '%translator' ]
   return node
 
 ############################################################################################################

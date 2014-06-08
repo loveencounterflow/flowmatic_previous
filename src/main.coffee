@@ -85,8 +85,11 @@ MULTIMIX                  = require 'coffeenode-multimix'
   ### TAINT call to grammar.as.coffee to be phased out ###
   return grammar.as.coffee node if ( grammar = node[ 'x-grammar' ] )?
   return translator.coffee node if ( translator = node[ 'translator' ] )?
+  return translator.coffee node if ( translator = node[ '%translator' ] )?
   type    = node[ 'type' ]
   type   += '/' + node[ 'x-subtype' ] if node[ 'x-subtype' ]?
+  # ### TAINT stopgap solution ###
+  # target  = if node[ 'value' ]? then rpr @new._delete_grammar_references node[ 'value' ] else rpr @new._delete_grammar_references node
   target  = if node[ 'value' ]? then rpr node[ 'value' ] else rpr node
   taints  = {}
   taints[ "unable to find translator for #{type}" ] = 1
