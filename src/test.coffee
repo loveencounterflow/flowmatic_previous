@@ -97,12 +97,13 @@ escodegen_options         = ( require '../options' )[ 'escodegen' ]
     module = require route
     #.......................................................................................................
     ### TAINT reference to `$TESTS` to be removed ###
-    unless ( TESTS = module[ '$TESTS' ] ? module[ 'tests' ] )?
+    TESTS = module[ '$TESTS' ] ? module[ 'tests' ]
+    unless TESTS? and ( test_names = ( test_name for test_name of TESTS ) ).length > 0
       miss_count += 1
       urge "no tests found for #{nr}-#{module_name} (#{route})"
       continue
     #.......................................................................................................
-    for test_name of TESTS
+    for test_name in test_names
       test_count += 1
       locator     = ( rpr nr ) + '-' + module_name + '/' + test_name
       try
