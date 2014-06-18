@@ -27,6 +27,7 @@
     "coffeenode-text": "^0.1.5",
     "coffeenode-trm": "^0.1.15",
     "coffeenode-types": "^0.1.1",
+    "docopt": "^0.4.0",
     "esquery": "^0.3.0",
     "estraverse": "^1.5.0",
     "glob": "^4.0.0",

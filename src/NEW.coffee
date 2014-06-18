@@ -183,11 +183,6 @@ copy = ( value ) ->
 #   R = @literal subtype, 'xxx', 'xxx', verbatim
 #   R[ 'x-level' ] = level
 
-#-----------------------------------------------------------------------------------------------------------
-@x_use_statement = ( keyword, argument ) ->
-  text = "#{keyword} #{rpr argument}"
-  return @x_comment text, 'use-statement'
-
 
 #===========================================================================================================
 # HELPERS

@@ -24,10 +24,14 @@ echo                      = TRM.echo.bind TRM
 LOADER                    = require './LOADER'
 assert                    = require 'assert'
 #...........................................................................................................
+docopt                    = ( require 'docopt' ).docopt
 BNP                       = require 'coffeenode-bitsnpieces'
 # ESCODEGEN                 = require 'escodegen'
 # escodegen_options         = ( require '../options' )[ 'escodegen' ]
 @new                      = require './new'
+#...........................................................................................................
+@cl_options               = null
+
 
 #-----------------------------------------------------------------------------------------------------------
 @test =
@@ -66,15 +70,20 @@ BNP                       = require 'coffeenode-bitsnpieces'
   throws: assert.throws.bind assert
 
 #-----------------------------------------------------------------------------------------------------------
-@_matches_filter = ( nr, module_name, matchers ) ->
-  return ( nr isnt 0 ) if matchers.length is 0
-  for matcher in matchers
-    return yes if matcher is "#{nr}"
-    return yes if matcher.test? and matcher.test module_name
+@_matches_filter = ( nr, module_name, hints ) ->
+  return ( nr isnt 0 ) if hints.length is 0
+  for hint in hints
+    return yes if hint is "#{nr}"
+    return yes if hint.test? and hint.test module_name
   return no
 
 #-----------------------------------------------------------------------------------------------------------
 @main = ->
+  # if TYPES.isa_text cl_options
+  #   help cl_options
+  # whisper cl_options[ '--long-errors' ]
+  # process.exit()
+  #.........................................................................................................
   route_infos   = LOADER.get_route_infos 'is-tty': yes
   route_count   = route_infos.length
   skip_count    = 0
@@ -82,20 +91,21 @@ BNP                       = require 'coffeenode-bitsnpieces'
   pass_count    = 0
   fail_count    = 0
   miss_count    = 0
-  matchers      = process.argv[ 2 .. ]
-  whisper "matching modules with #{( rpr m for m in matchers ).join ', '}" unless matchers.length is 0
-  for m, idx in matchers
+  hints         = @cl_options[ '<hints>' ]
+  #.........................................................................................................
+  whisper "matching modules with #{( rpr m for m in hints ).join ', '}" unless hints.length is 0
+  for m, idx in hints
     unless /^[0-9]+$/.test m
       if m is '+'
         m = /.*/
       else
         m = new RegExp ".*#{BNP.escape_regex m}.*", 'i'
-    matchers[ idx ] = m
-  whisper matchers
+    hints[ idx ] = m
+  # whisper hints
   #.........................................................................................................
   for route_info in route_infos
     { route, name: module_name, nr } = route_info
-    unless @_matches_filter nr, module_name, matchers
+    unless @_matches_filter nr, module_name, hints
       whisper "skipping #{nr}-#{module_name}"
       skip_count += 1
       continue
@@ -117,8 +127,10 @@ BNP                       = require 'coffeenode-bitsnpieces'
       catch error
         fail_count += 1
         warn "#{locator}:"
-        warn error[ 'message' ]
-        # warn error[ 'stack' ]
+        if @cl_options[ '--long-errors' ]
+          warn error[ 'stack' ]
+        else
+          warn error[ 'message' ]
         continue
       #.....................................................................................................
       pass_count += 1
@@ -139,6 +151,15 @@ BNP                       = require 'coffeenode-bitsnpieces'
 
 
 ############################################################################################################
-@main() unless module.parent?
+unless module.parent?
+  usage = """
+  Usage: test [options] [<hints>]...
 
+  Options:
+    -l, --long-errors       Show error messages with stacks.
+    -h, --help
+    -v, --version
+  """
+  @cl_options = docopt usage, version: ( require '../package.json' )[ 'version' ]
+  @main()
 

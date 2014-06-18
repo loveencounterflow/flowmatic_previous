@@ -88,9 +88,10 @@ MULTIMIX                  = require 'coffeenode-multimix'
   return translator.coffee node if ( translator = node[ '%translator' ] )?
   type    = node[ 'type' ]
   type   += '/' + node[ 'x-subtype' ] if node[ 'x-subtype' ]?
+  throw new Error "unable to find translator for #{type}"
   # ### TAINT stopgap solution ###
   # target  = if node[ 'value' ]? then rpr @new._delete_grammar_references node[ 'value' ] else rpr @new._delete_grammar_references node
-  target  = if node[ 'value' ]? then rpr node[ 'value' ] else rpr node
+  # target  = if node[ 'value' ]? then rpr node[ 'value' ] else rpr node
   taints  = {}
   taints[ "unable to find translator for #{type}" ] = 1
   return target: target, taints: taints
