@@ -120,6 +120,7 @@ BNP                       = require 'coffeenode-bitsnpieces'
       continue
     #.......................................................................................................
     for test_name in test_names
+      continue if test_name[ 0 ] is '_'
       test_count += 1
       locator     = ( rpr nr ) + '-' + module_name + '/' + test_name
       try

@@ -93,8 +93,9 @@ copy = ( value ) ->
 #-----------------------------------------------------------------------------------------------------------
 @consolidate = ( grammar ) ->
   # info grammar
-  grammar[ 'nodes' ]?= {}
-  grammar[ 'tests' ]?= {}
+  grammar[ 'nodes'    ]?= {}
+  grammar[ 'tests'    ]?= {}
+  grammar[ 'helpers'  ]?= {}
   constructor = grammar[ 'constructor' ]
   options     = grammar[ 'options' ] ? {}
   throw new Error "unable to find constructor in grammar" unless TYPES.isa_function constructor
@@ -104,6 +105,7 @@ copy = ( value ) ->
   for name, member of grammar
     # info name
     continue if name is 'constructor'
+    continue if name is 'helpers'
     continue if name is 'nodes'
     continue if name is 'tests'
     continue if name is 'options'

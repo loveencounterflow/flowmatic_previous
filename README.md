@@ -1,19 +1,34 @@
 ![](https://github.com/loveencounterflow/FLOWMATIC/raw/master/artwork/flowmatic-logo-3-1.png)
 
 
-- [Synopsis](#synopsis)
-- [Examples](#examples)
-- [Testing](#testing)
-- [Building Grammars: A Code Walkthrough](#building-grammars-a-code-walkthrough)
-	- [Preamble](#preamble)
-	- [Options](#options)
-	- [Constructor](#constructor)
-		- [Constructor: Grammar Rules](#constructor-grammar-rules)
-		- [Constructor: Node Producers](#constructor-node-producers)
-		- [Constructor: Translators](#constructor-translators)
-		- [Constructor: Test Cases](#constructor-test-cases)
-			- [Running Tests](#running-tests)
-	- [Dependency Ordering](#dependency-ordering)
+	- [Synopsis](#synopsis)
+	- [Examples](#examples)
+	- [Testing](#testing)
+	- [Building Grammars: A Code Walkthrough](#building-grammars-a-code-walkthrough)
+		- [Preamble](#preamble)
+		- [Options](#options)
+		- [Constructor](#constructor)
+			- [Constructor: Grammar Rules](#constructor-grammar-rules)
+			- [Constructor: Node Producers](#constructor-node-producers)
+			- [Constructor: Translators](#constructor-translators)
+			- [Constructor: Test Cases](#constructor-test-cases)
+				- [Running Tests](#running-tests)
+	- [Grammar](#grammar)
+- [............................................](#)
+- [............................................](#-1)
+- [............................................](#-2)
+- [............................................](#-3)
+- [............................................](#-4)
+- [............................................](#-5)
+- [............................................](#-6)
+- [............................................](#-7)
+- [............................................](#-8)
+- [a)](#a)
+- [b)](#b)
+- [^^ automatically inserted? required in source?](#^^-automatically-inserted-required-in-source)
+- [............................................](#-9)
+- [equivalent to the 'regular' linear form with no parentheses and commas:](#equivalent-to-the-'regular'-linear-form-with-no-parentheses-and-commas)
+		- [Dependency Ordering](#dependency-ordering)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -451,10 +466,135 @@ their respective number onto the command line. In the above, we skipped everythi
 14 modules; however, one module had no test cases, so 3 modules remain. In those 3 modules, there were
 21 test cases, which all performed dandy save one.
 
-As a matter of convention, modules numbered `0` (zero) are considered premature or experimental and are not
-included in test runs except when tests are run with an `*` asterisk (to run everything) or a `0` (zero) (to
-also include experimental stuff). You can also include (case-insensitive fragments of) module names, so
-e.g. `arabika/test exp` will run the tests of `0-EXPERIMENTS` as well as those of `0-MORE-EXPERIMENTS`.
+As a matter of convention, modules numbered `0` (zero) are considered premature, experimental or obsolete
+and are not included in test runs except when tests are run with an `*` asterisk (to run everything) or a
+`0` (zero) (to also include experimental stuff). You can also include (case-insensitive fragments of) module
+names, so e.g. `arabika/test exp` will run the tests of `0-EXPERIMENTS` as well as those of `0-MORE-
+EXPERIMENTS`.
+
+
+## Grammar
+
+...
+
+<!--
+
+#............................................
+loop                    # loop(foo;break)
+  foo
+  break
+
+#............................................
+a: [ 2, 4, 8 ]          # a: [ 2, 4, 8 ]
+
+#............................................
+a:                      # a:([ 2, 4, 8 ])
+  [ 2, 4, 8 ]
+
+#............................................
+a: []                   # a: [](2;4;8)
+  2
+  4
+  8
+
+#............................................
+f: ( a, b ) <-> a + b
+
+#............................................
+f:
+  a, b
+<-> a + b
+
+f: ( a, b ) <-> ( a + b )
+
+
+f:
+  a, b
+<->
+  a + b
+
+#............................................
+a: ( 3 + 2 ) * 4
+a:
+  3 + 2
+* 4
+a:(3 + 2)* 4
+
+#............................................
+a:
+  ( 3 + 2 ) * 4
+a:((3 + 2)* 4)
+
+#............................................
+# a)
+f: ->
+  return
+    a: 42
+    b: 108
+
+# b)
+f: ->
+  return {}
+    a: 42
+    b: 108
+f: ->(return{}(a: 42;b: 108))
+#           ^^ automatically inserted? required in source?
+
+#............................................
+do_something
+  foo
+  bar
+  42
+
+do_something()(foo;bar;42)
+# equivalent to the 'regular' linear form with no parentheses and commas:
+do_something foo, bar, 42
+
+commas are only used:
+  * to separate elements of lists (with explicit `[]`)
+  * to separate facets of PODs (within implicit or explicit {})
+  * to separate arguments of functions (within implicit `()`)
+
+a semicolon-separated sequence of statements is
+  * interpreted as a POD when immediately preceded by an empty pair of braces: `{}(a: 1;b: 2;c: 3)`
+  * interpreted as a list when immediately preceded by an empty pair of brackets: `[](1;2;3)`
+  * just a sequence of statements otherwise
+
+brackets `[]` are only used to write list literals; in order to access elements (as in JS `d[ 3 ]`), use
+the slash to write a route instead:
+
+d: [ 5, 7, 9 ]  # assign a list with three elements
+e: d/2          # get element with index `2`; `e` is now `9`
+
+Use the `$` operator for symbolic access:
+
+```
+for idx in [ 0 .. 2 ]
+  log d/$idx
+
+idx = 2
+
+f: <-> d/$../idx
+```
+
+```
+message: """helo
+  out
+    there"""
+```
+
+```
+message: """helo(out(there))""" # wrong!
+```
+
+should become:
+
+```
+message: """helo\n  out\n    there"""
+```
+
+ -->
+
 
 
 <!--
