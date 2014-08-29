@@ -18,7 +18,7 @@ echo                      = TRM.echo.bind TRM
 rainbow                   = TRM.rainbow.bind TRM
 #...........................................................................................................
 @new                      = require './new'
-@_loader                  = require './LOADER'
+# @_loader                  = require './LOADER'
 MULTIMIX                  = require 'coffeenode-multimix'
 ƒ                         = @
 π                         = require 'coffeenode-packrattle'
@@ -112,17 +112,17 @@ MULTIMIX                  = require 'coffeenode-multimix'
 
 
 
-############################################################################################################
-route_infos     = @_loader.get_route_infos()
-for route_info in route_infos
-  { route
-    name
-    nr    }   = route_info
-  throw new Error "duplicate module #{route}:\nname #{rpr name} already in use" if @[ name ]?
-  module      = require route
-  @[ name ]   = MULTIMIX.bundle module
+# ############################################################################################################
+# route_infos     = @_loader.get_route_infos()
+# for route_info in route_infos
+#   { route
+#     name
+#     nr    }   = route_info
+#   throw new Error "duplicate module #{route}:\nname #{rpr name} already in use" if @[ name ]?
+#   module      = require route
+#   @[ name ]   = MULTIMIX.bundle module
 
-# module.exports  = MULTIMIX.assemble @, modules...
+# # module.exports  = MULTIMIX.assemble @, modules...
 
 
 
