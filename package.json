@@ -25,5 +25,12 @@
     "url": "https://github.com/loveencounterflow/flowmatic/issues"
   },
   "dependencies": {
+    "cnd": "^4.2.0",
+    "coffeenode-suspend": "^0.1.11",
+    "coffeescript": "^2.0.0-alpha1",
+    "pipestreams": "0.0.9"
+  },
+  "devDependencies": {
+    "tap": "^10.2.1"
   }
 }
