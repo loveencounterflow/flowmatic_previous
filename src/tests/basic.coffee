@@ -22,6 +22,7 @@ PS                        = require 'pipestreams'
 { $, $async, }            = PS
 { step, }                 = require 'coffeenode-suspend'
 
+### TAINT refactor HELPERS ###
 
 #-----------------------------------------------------------------------------------------------------------
 HELPERS = {}
@@ -180,6 +181,50 @@ TAP.test "strings etc.", ( T ) ->
       ['"""x y z"""','']
       ['`x y z`','']
       ['```x y z```','']
+      ]
+    #.........................................................................................................
+    for [ probe, matcher, ] in probes_and_matchers
+      protocol = yield HELPERS.transpile_B probe, resume
+      urge probe
+      help protocol
+      # debug JSON.stringify [ probe, protocol, ]
+      # T.ok CND.equals protocol, matcher
+    T.end()
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+TAP.test "brackets etc.", ( T ) ->
+  step ( resume ) ->
+    probes_and_matchers = [
+      ['for x in [ 9 12','']
+      ['a [ b','']
+      ['a ] b','']
+      ['a ( b','']
+      ['a ) b','']
+      ['a { b','']
+      ['a } b','']
+      ]
+    #.........................................................................................................
+    for [ probe, matcher, ] in probes_and_matchers
+      protocol = yield HELPERS.transpile_B probe, resume
+      urge probe
+      help protocol
+      # debug JSON.stringify [ probe, protocol, ]
+      # T.ok CND.equals protocol, matcher
+    T.end()
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+TAP.test "special strings", ( T ) ->
+  step ( resume ) ->
+    probes_and_matchers = [
+      ['f"x"','']
+      ['u-cjk/4e0b\t下 ⿱一卜','']
+      ['u-cjk/4e0c\t丌 ⿱一&jzr#xe110;','']
+      ['u-cjk/4e0d\t不 ⿸丆卜','']
+      ['u-cjk-xb/27fb5\t𧾵 ⿺走矍','']
       ]
     #.........................................................................................................
     for [ probe, matcher, ] in probes_and_matchers
