@@ -28,11 +28,13 @@
     "cnd": "^4.2.0",
     "coffeenode-suspend": "^0.1.11",
     "coffeescript": "^2.0.0-alpha1",
+    "ltsort": "^1.2.1",
     "pipestreams": "0.0.9",
+    "unicode-properties": "^1.1.0",
     "xregexp": "^3.1.1"
   },
   "devDependencies": {
     "randexp": "^0.4.5",
-    "tap": "^10.2.1"
+    "tap": "^10.3.0"
   }
 }
