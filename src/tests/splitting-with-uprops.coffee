@@ -435,6 +435,14 @@ show graph
 XXX.attach graph, 'LEXER/rewrite-lws', '/PS/show'
 show graph
 
+graph = LTSORT.new_graph loners: no
+debug LTSORT.get_linearity graph
+LTSORT.add graph, 'A', 'B'
+LTSORT.add graph, 'B', 'C'
+info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph
+LTSORT.add graph, 'A', 'a'
+info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph
+
 
 
 
