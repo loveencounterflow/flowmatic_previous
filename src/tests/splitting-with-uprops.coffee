@@ -400,16 +400,18 @@ f = ->
 f.apply XXX = {}
 
 entries = [
-  [ 'LEXER/~START',         feeds: 'LEXER/~STOP',                                            ]
-  [ 'TRANSFORM/~START',     needs: 'LEXER/~STOP',           feeds: 'TRANSFORM/~STOP',        ]
-  [ 'WRITER/~START',        feeds: 'WRITER/~STOP',                                           ]
-  [ 'WRITER/~START',        needs: 'TRANSFORM/~STOP',                                        ]
-  [ 'LEXER/as-lines',       needs: 'LEXER/~START',                                           ]
+  # [ 'LEXER/~START',         feeds: 'LEXER/~STOP',                                            ]
+  # [ 'TRANSFORM/~START',     needs: 'LEXER/~STOP',           feeds: 'TRANSFORM/~STOP',        ]
+  # [ 'WRITER/~START',        feeds: 'WRITER/~STOP',                                           ]
+  # [ 'WRITER/~START',        needs: 'TRANSFORM/~STOP',                                        ]
+  # [ 'LEXER/as-lines',       needs: 'LEXER/~START',                                           ]
+  [ 'LEXER/as-lines',                                                  ]
   [ 'LEXER/as-characters',  needs: 'LEXER/as-lines',                                         ]
   [ 'LEXER/add-uccs',       needs: 'LEXER/as-characters',                                    ]
   [ 'LEXER/rewrite-lws',    needs: 'LEXER/add-uccs',        feeds:  'LEXER/group-by-ucc',    ]
   [ 'LEXER/group-by-ucc',   needs: 'LEXER/add-uccs',                                         ]
-  [ 'LEXER/join-groups',    needs: 'LEXER/group-by-ucc',    feeds: 'LEXER/~STOP',            ]
+  # [ 'LEXER/join-groups',    needs: 'LEXER/group-by-ucc',    feeds: 'LEXER/~STOP',            ]
+  [ 'LEXER/join-groups',    needs: 'LEXER/group-by-ucc',                ]
   ]
 
 show = ( graph ) ->
@@ -435,15 +437,37 @@ show graph
 XXX.attach graph, 'LEXER/rewrite-lws', '/PS/show'
 show graph
 
+
+#-----------------------------------------------------------------------------------------------------------
+@get_linearity = ( graph ) ->
+  ### Linearity of a given dependency graph measures how well the dependency relations in a graph
+  determine an ordering of its nodes. For a graph that defines a unique, single chain of antecedents and
+  consequents, linearity will be 1; for a graph that defines only nodes and no dependency edges, linearity
+  will be zero; for all other kind of graphs, linearity will be the inverse of the average group length.
+  The linearity of all graphs with a single element is 1. The linearity of the emtpy graph is also 1, since
+  that is the limit that is approached taking ever more nodes out of maximally linear as well as out of
+  minimally linear (parallel-only) graphs. ###
+  throw new Error "linearity not implemented for graphs with loners" if graph[ 'loners' ]
+  groups  = @group graph
+  size    = groups.length
+  return 1 if size is 0
+  count   = 0
+  count  += group.length for group in groups
+  minimum = 1 / count
+  shrink  = 1 - minimum
+  return ( ( groups.length / count ) - minimum ) / shrink
+
 graph = LTSORT.new_graph loners: no
-debug LTSORT.get_linearity graph
+LTSORT.add graph, 'X'
+LTSORT.add graph, 'Y'
+debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
+LTSORT.add graph, 'Z'
+debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
 LTSORT.add graph, 'A', 'B'
 LTSORT.add graph, 'B', 'C'
-info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph
+info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
 LTSORT.add graph, 'A', 'a'
-info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph
-
-
+info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
 
 
 
