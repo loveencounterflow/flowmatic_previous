@@ -46,8 +46,10 @@ PATH                      = require 'path'
 UPROPS                    = require 'unicode-properties'
 #...........................................................................................................
 TAP                       = require 'tap'
-Xregex                    = require 'xregexp'
-Xregex.install 'astral'
+# Xregex                    = require 'xregexp'
+# Xregex.install 'astral'
+
+
 { sepia
   plum
   pink
@@ -59,60 +61,16 @@ Xregex.install 'astral'
   lime
   steel } = CND
 
-debug sepia   '#####', 'sepia'
-debug plum    '#####', 'plum'
-debug orange  '#####', 'orange'
-debug olive   '#####', 'olive'
-debug indigo  '#####', 'indigo'
-debug crimson '#####', 'crimson'
-debug brown   '#####', 'brown'
-debug lime    '#####', 'lime'
-debug steel   '#####', 'steel'
+# debug sepia   '#####', 'sepia'
+# debug plum    '#####', 'plum'
+# debug orange  '#####', 'orange'
+# debug olive   '#####', 'olive'
+# debug indigo  '#####', 'indigo'
+# debug crimson '#####', 'crimson'
+# debug brown   '#####', 'brown'
+# debug lime    '#####', 'lime'
+# debug steel   '#####', 'steel'
 
-
-
-categories = [
-  { name: 'C',   alias: 'Other',                   }
-  { name: 'L',   alias: 'Letter',                  }
-  { name: 'M',   alias: 'Mark',                    }
-  { name: 'N',   alias: 'Number',                  }
-  { name: 'P',   alias: 'Punctuation',             }
-  { name: 'S',   alias: 'Symbol',                  }
-  { name: 'Z',   alias: 'Separator',               }
-  ]
-
-sub_categories = [
-  { name: 'Cc',  alias: 'Control',                 }
-  { name: 'Cf',  alias: 'Format',                  }
-  { name: 'Cn',  alias: 'Unassigned',              }
-  { name: 'Co',  alias: 'Private_Use',             }
-  { name: 'Cs',  alias: 'Surrogate',               }
-  { name: 'Ll',  alias: 'Lowercase_Letter',        }
-  { name: 'Lm',  alias: 'Modifier_Letter',         }
-  { name: 'Lo',  alias: 'Other_Letter',            }
-  { name: 'Lt',  alias: 'Titlecase_Letter',        }
-  { name: 'Lu',  alias: 'Uppercase_Letter',        }
-  { name: 'Mc',  alias: 'Spacing_Mark',            }
-  { name: 'Me',  alias: 'Enclosing_Mark',          }
-  { name: 'Mn',  alias: 'Nonspacing_Mark',         }
-  { name: 'Nd',  alias: 'Decimal_Number',          }
-  { name: 'Nl',  alias: 'Letter_Number',           }
-  { name: 'No',  alias: 'Other_Number',            }
-  { name: 'Pc',  alias: 'Connector_Punctuation',   }
-  { name: 'Pd',  alias: 'Dash_Punctuation',        }
-  { name: 'Pe',  alias: 'Close_Punctuation',       }
-  { name: 'Pf',  alias: 'Final_Punctuation',       }
-  { name: 'Pi',  alias: 'Initial_Punctuation',     }
-  { name: 'Po',  alias: 'Other_Punctuation',       }
-  { name: 'Ps',  alias: 'Open_Punctuation',        }
-  { name: 'Sc',  alias: 'Currency_Symbol',         }
-  { name: 'Sk',  alias: 'Modifier_Symbol',         }
-  { name: 'Sm',  alias: 'Math_Symbol',             }
-  { name: 'So',  alias: 'Other_Symbol',            }
-  { name: 'Zl',  alias: 'Line_Separator',          }
-  { name: 'Zp',  alias: 'Paragraph_Separator',     }
-  { name: 'Zs',  alias: 'Space_Separator',         }
-  ]
 
 ucc_of    = ( chr ) -> ( UPROPS.getCategory chr.codePointAt 0 )[ 0 ]
 thin_out  = ( list ) -> ( x for x in list when x isnt '' )
@@ -124,6 +82,8 @@ get_color = ( c1, c2 ) -> ( x ) -> if toggle() then c1 x else c2 x
 color     = get_color steel, orange
 rainbow   = ( list ) -> ( ( color chrrpr x ) for x in list ).join ''
 join      = ( list ) -> list.join '_'
+### TAINT pluck for lists looks different ###
+pluck     = ( x, key ) -> R = x[ key ]; delete x[ key ]; return R
 
 PS                        = require 'pipestreams'
 { $, map, }               = PS
@@ -132,52 +92,199 @@ PS                        = require 'pipestreams'
 
 
 f = ->
+  #===========================================================================================================
+  # LEX/prepare
   #-----------------------------------------------------------------------------------------------------------
-  @$lex = ->
+  @$prepare = ->
     pipeline = []
-    pipeline.push @$as_lines()
-    pipeline.push @$as_characters()
-    pipeline.push @$add_uccs()
-    pipeline.push @$rewrite_lws()
-    pipeline.push @$group_by_ucc()
-    pipeline.push @$join_groups()
+    pipeline.push @$prepare.$as_lines()         # LEX/prepare/as-lines
+    pipeline.push @$prepare.$as_line_events()   # LEX/prepare/as-line-events
+    pipeline.push @$prepare.$add_positions()    # LEX/prepare/add-positions
+    pipeline.push @$prepare.$add_chunks()       # LEX/prepare/add-positions
+    pipeline.push @$prepare.$TEST_recognize_ncrs()
+    pipeline.push @$prepare.$as_chrs()          # LEX/prepare/as-chrs
     return PS.pull pipeline...
 
   #-----------------------------------------------------------------------------------------------------------
-  @$as_lines      = -> PS.$split()
-  @$as_characters = -> PS.map ( line ) -> Array.from line
-  @$add_uccs      = -> PS.map ( chrs ) -> ( [ chr, ucc_of chr ] for chr in chrs )
+  @$prepare.$as_lines = =>
+    ### Only recognizes `\n` (as it should). In the sequences `\r`, `\r\n`, `\n\r`, `\u2028`, `\u2029`, only
+    `\n` (U+000a) causes a new line, and all other codepoints are preserved. ###
+    return PS.$split()
 
   #-----------------------------------------------------------------------------------------------------------
-  @$rewrite_lws = -> PS.map ( chrs_and_uccs ) ->
-    return ( [ chr, ( if chr is '\x20' then 'lws' else ucc ) ] for [ chr, ucc, ] in chrs_and_uccs )
+  @$prepare.$as_line_events = =>
+    ### TAINT assuming all lines are terminated with `\n` ###
+    return PS.map ( image ) ->
+      return { type: 'line', image, }
 
   #-----------------------------------------------------------------------------------------------------------
-  @$join_groups = -> PS.map ( event ) ->
-    chunk.chrs = chunk.chrs.join '' for chunk in event.chunks
-    return event
+  @$prepare.$add_positions = =>
+    line_nr = 0
+    start   = 0
+    stop    = 0
+    return PS.map ( event ) ->
+      { image, }      = event
+      line_nr        += +1
+      ### `+ 1` to account for newline that has been omitted ###
+      stop            = start + image.length + 1
+      event.position  = { line: line_nr, start, stop, }
+      start           = stop
+      return event
 
   #-----------------------------------------------------------------------------------------------------------
-  @$group_by_ucc = ->
-    return $ ( chrs_and_uccs, send ) ->
-      prv_ucc   = null
-      chrs      = null
-      chunk     = null
-      chunks    = []
-      event     = { type: 'line', chunks, }
+  @$prepare.$add_chunks = =>
+    ### TAINT assuming all lines are terminated with `\n` ###
+    return PS.map ( event ) ->
+      return event unless event.type is 'line'
+      position        = Object.assign {}, event.position
+      ### TAINT *must* be able at this point to distinguish lines with and without newline ###
+      # position.stop  += -1 # adjust for missing newline
+      chunk           = Object.assign {}, event, { position, }
+      chunk.type      = 'chrs'
+      event.chunks    = [ chunk, ]
+      debug '7739', chunk.position is event.position
+      return event
+
+  #-----------------------------------------------------------------------------------------------------------
+  @$prepare.$TEST_recognize_ncrs = ->
+    # pattern = /// ( &\# x ) ( [ 0-9 a-f ]{1,6} ) ( ; ) ///g
+    pattern = /// ( &\# x     [ 0-9 a-f ]{1,6}     ; ) ///g
+    return PS.map ( event ) ->
+      return event unless event.type is 'line'
+      debug '32221', event
       #.......................................................................................................
-      for [ chr, ucc, ] in chrs_and_uccs
-        if ucc isnt prv_ucc
-          if chunk?
-            chunks.push chunk
-          chrs    = []
-          chunk   = { ucc, chrs, }
-          prv_ucc = ucc
-        chrs.push chr
-      chunks.push chunk if chunk?
+      source_chunks = event.chunks
+      target_chunks = event.chunks = []
       #.......................................................................................................
-      send event
-      return null
+      for source_chunk in source_chunks
+        #.....................................................................................................
+        unless source_chunk.type is 'chrs'
+          target_chunks.push source_chunk
+          continue
+        #.....................................................................................................
+        { image, }        = source_chunk
+        debug image.split pattern
+        # pattern.lastIndex = 0
+        #.....................................................................................................
+        # while ( match = pattern.exec image )?
+        #   start                 = match.index
+        #   [ stretch, cid_hex, ] = match
+        #   stop                  = start + stretch.length
+        #   cid                   = parseInt cid_hex, 16
+        #   debug '33211', ( rpr image ), match
+        #   prefix                = image[ ... start               ]
+        #   infix                 = image[     start ... stop      ]
+        #   suffix                = image[               stop ...  ]
+        #   target_chunks.push { type: 'chrs',  image: prefix } if prefix.length > 0
+        #   target_chunks.push { type: 'ncr',   image: infix, cid, }
+        #   target_chunks.push { type: 'chrs',  image: suffix } if suffix.length > 0
+      #.......................................................................................................
+      info '99982', event
+      return event
+
+  #-----------------------------------------------------------------------------------------------------------
+  @$prepare.$as_chrs = =>
+    return PS.map ( event ) ->
+      source_chunks = event.chunks
+      target_chunks = event.chunks = []
+      for source_chunk in source_chunks
+        unless source_chunk.type is 'chrs'
+          target_chunks.push source_chunk
+          continue
+        { line: line_nr, start, } = source_chunk.position
+        for chr in Array.from source_chunk.image
+          stop          = start + chr.length
+          position      = { line: line_nr, start, stop, }
+          target_chunk  = { type: 'chr', position, image: chr, }
+          start         = stop
+          target_chunks.push target_chunk
+      return event
+
+
+  #===========================================================================================================
+  #
+  #-----------------------------------------------------------------------------------------------------------
+  @$group_chrs_by_ucc = ->
+    pipeline = []
+    pipeline.push @$group_chrs_by_ucc.$add_uccs()
+    pipeline.push @$group_chrs_by_ucc.$rewrite_lws()
+    # pipeline.push PS.$show title: '368723'
+    pipeline.push @$group_chrs_by_ucc.$group_by_ucc()
+    return PS.pull pipeline...
+
+  #-----------------------------------------------------------------------------------------------------------
+  @$group_chrs_by_ucc.$add_uccs = =>
+    return PS.map ( event ) ->
+      return event unless event.type is 'line'
+      for chunk in event.chunks
+        continue unless chunk.type is 'chr'
+        chunk.ucc = ucc_of chunk.image
+      return event
+
+  #-----------------------------------------------------------------------------------------------------------
+  @$group_chrs_by_ucc.$rewrite_lws = ->
+    return PS.map ( event ) ->
+      return event unless event.type is 'line'
+      for chunk in event.chunks
+        continue unless chunk.type is 'chr'
+        continue unless chunk.image is '\u0020'
+        chunk.ucc = 'lws'
+      return event
+
+  #-----------------------------------------------------------------------------------------------------------
+  @$group_chrs_by_ucc.$group_by_ucc = ->
+    ### TAINT could / should be optimized to use collector list, then concatenate all chunks at once ###
+    #.........................................................................................................
+    merge_chunks = ( a, b ) ->
+      R           = Object.assign {}, a
+      R.position  = Object.assign {}, R.position
+      R.type      = 'chrs'
+      return R unless b?
+      unless a.position.line is b.position.line
+        throw new Error "can't merge chunks from different lines: #{rpr a}, #{rpr b}"
+      unless a.position.start <= b.position.start
+        throw new Error "MEH #1"
+      unless a.position.stop is b.position.start
+        throw new Error "MEH #2"
+      unless a.ucc is b.ucc
+        throw new Error "MEH #3"
+      R.position.stop = b.position.stop
+      R.image         = R.image + b.image
+      return R
+    #.........................................................................................................
+    return PS.map ( event ) ->
+      return event unless event.type is 'line'
+      source_chunks     = event.chunks
+      target_chunks     = event.chunks = []
+      target_chunk      = null
+      #.......................................................................................................
+      for chunk in source_chunks
+        unless chunk.type is 'chr'
+          target_chunks.push chunk
+          continue
+        { ucc, } = chunk
+        if ucc is prv_ucc
+          target_chunk = merge_chunks target_chunk, chunk
+        else
+          if target_chunk?
+            target_chunks.push target_chunk
+            target_chunk = null
+        target_chunk ?= merge_chunks chunk
+        prv_ucc       = ucc
+        # debug '44532', target_chunk
+      #.......................................................................................................
+      target_chunks.push target_chunk if target_chunk?
+      return event
+
+  #===========================================================================================================
+  #
+  #-----------------------------------------------------------------------------------------------------------
+  @$lex = ->
+    pipeline = []
+    pipeline.push @$prepare()
+    pipeline.push @$group_chrs_by_ucc()
+    # pipeline.push PS.$show()
+    return PS.pull pipeline...
 
   #-----------------------------------------------------------------------------------------------------------
   @lex = ( text, handler ) ->
@@ -198,7 +305,6 @@ f = ->
 FM = {}
 f.apply FM.LEXER = {}
 
-###
 
 #-----------------------------------------------------------------------------------------------------------
 TAP.test "basic model", ( T ) ->
@@ -208,10 +314,21 @@ TAP.test "basic model", ( T ) ->
   # Randex  = require 'randexp'
   # randex  = new Randex /[-\x20a-z0-9\/()\[\]§$%^°+*´`=?]{0,150}/
   probes_and_matchers = [
-    [ 'ab++c23\nd"axyzd\t++dy',   'ab_++_c_23_\n_d_"_a_xyz_d_\t_++_d_y', ]
-    [ 'ab++c23\nd"xyzd\t++dy',  'ab_++_c_23_\n_d_"_xyz_d_\t_++_d_y', ]
-    [ 'u-cjk-xb/22f33 𢼳 ⿰匡夊','']
-    [ 'y = x ** 2 for x in [ 1, 2, 3, ]','']
+    # [ 'ab++c23\nd"axyzd\t++dy',   'ab_++_c_23_\n_d_"_a_xyz_d_\t_++_d_y', ]
+    # [ 'ab++c23\nd"xyzd\t++dy',  'ab_++_c_23_\n_d_"_xyz_d_\t_++_d_y', ]
+    # [ 'y = x ** 2 for x in [ 1, 2, 3, ]','']
+    # [ '12ab','']
+    # [ '123abc$%\n2\n3\n456 xyz\n\n','']
+    # [ '1\n#','']
+    # [ '2\r#','']
+    # [ '3\r\n#','']
+    # [ '4\n\r#','']
+    # [ '5\u2028#','']
+    # [ '6\u2029#','']
+    # [ 'u-cjk-xb/22f33 𢼳 ⿰匡夊','']
+    [ 'a&#x21;z','']
+    # [ 'a&#x21;bc&#x22;de','']
+    # [ 'u-cjk-xb/22f33 &#x22f33; ⿰匡夊','']
     ]
   thin_out  = ( list ) -> ( x for x in list when x isnt '' )
   join      = ( list ) -> list.join '_'
@@ -219,7 +336,12 @@ TAP.test "basic model", ( T ) ->
   step ( resume ) ->
     for [ probe, matcher, ] in probes_and_matchers
       urge rpr probe
-      urge yield FM.LEXER.lex probe, resume
+      lines = yield FM.LEXER.lex probe, resume
+      for line in lines
+        whisper JSON.stringify line
+        warn line.position, rpr line.image
+        for chunk in line.chunks
+          help '  ' + JSON.stringify chunk
       # result  = join thin_out probe.split splitter
       # debug thin_out probe.split splitter
       # whisper rpr result
@@ -230,244 +352,6 @@ TAP.test "basic model", ( T ) ->
   #.........................................................................................................
   return null
 
-###
-
-FM[ 'has-transforms' ] = yes
-FM.LEXER[ 'has-transforms' ] = yes
-
-@walk_transforms = ( root, prefix = null ) -> @_walk_transforms root, prefix, {}
-
-@_walk_transforms = ( root, prefix = null, R ) ->
-  if prefix?
-    prefix = [ prefix, ] unless CND.isa_list prefix
-  else
-    prefix = []
-  for name, descriptor of Object.getOwnPropertyDescriptors root
-    { value: method, } = descriptor
-    switch type = CND.type_of method
-      when 'pod'
-        continue unless method[ 'has-transforms' ]
-        prefix.push name
-        return @_walk_transforms method, prefix, R
-        prefix.pop()
-      when 'function'
-        continue unless name.startsWith '$'
-        key               = name[ 1 .. ].replace /_/g, '-'
-        path              = PATH.join prefix..., key
-        { description, }  = method
-        description      ?= {}
-        R[ path ]         = { method, description, }
-  return R
-
-debug '89883', @walk_transforms FM, 'FM'
-debug '89883', FM
-# debug '89883', FM.LEXER.$lex.name
-
-
-LTSORT = require 'ltsort'
-
-f = ->
-  #-----------------------------------------------------------------------------------------------------------
-  @new_graph = ( prefix ) ->
-    R               = LTSORT.new_graph loners: no
-    ### TAINT use library-specific symbol ###
-    R[ '%prefix' ]        = prefix ? ''
-    R[ '%attachments' ]   = {}
-    return R
-
-  #-----------------------------------------------------------------------------------------------------------
-  @attach = ( me, need, key ) ->
-    need    = @_resolve_path me, need
-    ref     = @_resolve_path me, key
-    target  = me[ '%attachments' ][ need ] ?= []
-    target.push key
-    return null
-
-  #-----------------------------------------------------------------------------------------------------------
-  @_resolve_path = ( me, key ) ->
-    prefix  = me[ '%prefix' ]
-    R = PATH.resolve  '/', me[ '%prefix' ], key
-    R = PATH.relative '/', R if not PATH.isAbsolute prefix
-    return R
-
-  #-----------------------------------------------------------------------------------------------------------
-  @add = ( me, key, description ) ->
-    # name              = '$' + key.replace /-/g, '_'
-    needs   = null
-    feeds   = null
-    if description?
-      { needs, feeds, } = description
-    needs  ?= []
-    feeds  ?= []
-    needs   = @_pluralize null, needs
-    feeds   = @_pluralize null, feeds
-    needs   = ( @_resolve_path me, need for need in needs )
-    feeds   = ( @_resolve_path me, feed for feed in feeds )
-    ref     = @_resolve_path me, key
-    # @_add_ancestry me, ref
-    # @_add_ancestry me, needs
-    # @_add_ancestry me, feeds
-    @_add_start_and_stop me, ref
-    @_add_start_and_stop me, needs
-    @_add_start_and_stop me, feeds
-    LTSORT.add me, precedent,  ref             for precedent   in needs
-    LTSORT.add me,             ref, consequent for consequent  in feeds
-    return null
-
-  #-----------------------------------------------------------------------------------------------------------
-  @_pluralize = ( _, x ) -> if ( CND.isa_list x ) then x else [ x, ]
-
-  # #-----------------------------------------------------------------------------------------------------------
-  # @_add_ancestry = ( me, path_or_paths ) ->
-  #   paths     = @_pluralize null, path_or_paths
-  #   # ancestors = new Set()
-  #   @_add_start_and_stop me, paths
-  #   for path in paths
-  #     ancestors = @_get_ancestry null, path
-  #     parent    = ancestors[ 0 ]
-  #     if parent?
-  #       parent_start  = PATH.join parent, '~START'
-  #       parent_stop   = PATH.join parent, '~STOP'
-  #       @_add_start_and_stop me, [ parent_start, parent_stop, ]
-  #       LTSORT.add me, parent_start, path
-  #       LTSORT.add me,               path, parent_stop
-  #   #   for ancestor in @_get_ancestry null, path
-  #   #     ancestors.add ancestor # unless LTSORT.has_node me, ancestor
-  #   # ### NOTE do not iterate using `for x from set`, b/c iteration would include newly added elements ###
-  #   # # for ancestor in Array.from ancestors
-  #   # #   # debug '33322', PATH.join ancestor, '~START'
-  #   # #   ancestors.add PATH.join ancestor, '~START'
-  #   # for ancestor from ancestors
-  #   #   @_add_start_and_stop me, ancestor
-  #   return null
-
-  # #-----------------------------------------------------------------------------------------------------------
-  # _is_start = ( x ) -> x is '~START' or x.endsWith '/~START'
-  # _is_stop  = ( x ) -> x is '~STOP'  or x.endsWith '/~STOP'
-
-  #-----------------------------------------------------------------------------------------------------------
-  @_add_start_and_stop = ( me, path_or_paths ) ->
-    paths = @_pluralize null, path_or_paths
-    for path in paths
-      # debug '77762', [ '~START', path, ]
-      # debug '77762', [ path, '~STOP', ]
-      LTSORT.add me, '~START', path          unless path is '~START'
-      LTSORT.add me,           path, '~STOP' unless path is '~STOP'
-      # debug '88892', ( PATH.join ( PATH.dirname path ), '~START' )
-      # LTSORT.add me, ( PATH.join ( PATH.dirname path ), '~START' ), path
-    return null
-
-  #-----------------------------------------------------------------------------------------------------------
-  ### TAINT should honor result of `@group` method ###
-  @get_linearity  = ( me, P... ) -> LTSORT.get_linearity me, P...
-
-  #-----------------------------------------------------------------------------------------------------------
-  @group = ( me, P... ) ->
-    ### TAINT should only push attachments to current group when group length > 1 ###
-    groups  = LTSORT.group me, P...
-    R       = []
-    for group in groups
-      target = []
-      R.push target
-      for ref in group
-        target.push ref
-        ### TAINT code duplication ###
-        continue unless ( attachments = me[ '%attachments' ][ ref ] )?
-        target.push attachment for attachment in attachments
-    return R
-
-  #-----------------------------------------------------------------------------------------------------------
-  @linearize = ( me, P... ) ->
-    refs  = LTSORT.linearize me, P...
-    R     = []
-    for ref in refs
-      R.push ref
-      ### TAINT code duplication ###
-      continue unless ( attachments = me[ '%attachments' ][ ref ] )?
-      R.push attachment for attachment in attachments
-    return R
-
-  # #-----------------------------------------------------------------------------------------------------------
-  # @_get_ancestry = ( _, path ) ->
-  #   R = []
-  #   while path not in [ '.', '/', ]
-  #     ### TAINT contains one superfluous path operation ###
-  #     ### TAINT assumes all libraries are written with uppercase US ASCII letters ###
-  #     R.push path if /^[-A-Z]+$/.test PATH.basename path
-  #     path = PATH.dirname path
-  #   return R
-
-f.apply XXX = {}
-
-entries = [
-  # [ 'LEXER/~START',         feeds: 'LEXER/~STOP',                                            ]
-  # [ 'TRANSFORM/~START',     needs: 'LEXER/~STOP',           feeds: 'TRANSFORM/~STOP',        ]
-  # [ 'WRITER/~START',        feeds: 'WRITER/~STOP',                                           ]
-  # [ 'WRITER/~START',        needs: 'TRANSFORM/~STOP',                                        ]
-  # [ 'LEXER/as-lines',       needs: 'LEXER/~START',                                           ]
-  [ 'LEXER/as-lines',                                                  ]
-  [ 'LEXER/as-characters',  needs: 'LEXER/as-lines',                                         ]
-  [ 'LEXER/add-uccs',       needs: 'LEXER/as-characters',                                    ]
-  [ 'LEXER/rewrite-lws',    needs: 'LEXER/add-uccs',        feeds:  'LEXER/group-by-ucc',    ]
-  [ 'LEXER/group-by-ucc',   needs: 'LEXER/add-uccs',                                         ]
-  # [ 'LEXER/join-groups',    needs: 'LEXER/group-by-ucc',    feeds: 'LEXER/~STOP',            ]
-  [ 'LEXER/join-groups',    needs: 'LEXER/group-by-ucc',                ]
-  ]
-
-show = ( graph ) ->
-  help key for key in XXX.linearize graph
-  info group for group in XXX.group graph
-  info XXX.get_linearity graph
-
-graph = XXX.new_graph 'FM'
-for [ key, description, ] in CND.shuffle entries
-  XXX.add graph, key, description
-# debug '88876', LTSORT.find_root_nodes graph
-show graph
-
-
-# urge 'as-lines'
-# urge 'as-characters'
-# urge 'add-uccs'
-# urge 'rewrite-lws'
-# urge 'group-by-ucc'
-# urge 'join-groups'
-
-
-XXX.attach graph, 'LEXER/rewrite-lws', '/PS/show'
-show graph
-
-
-#-----------------------------------------------------------------------------------------------------------
-@get_linearity = ( graph ) ->
-  ### Linearity of a given dependency graph measures how well the dependency relations in a graph
-  determine an ordering of its nodes. For a graph that defines a unique, single chain of antecedents and
-  consequents, linearity will be 1; for a graph that defines only nodes and no dependency edges, linearity
-  will be zero; for all other kind of graphs, linearity will be the inverse of the average group length.
-  The linearity of all graphs with a single element is 1. The linearity of the emtpy graph is also 1, since
-  that is the limit that is approached taking ever more nodes out of maximally linear as well as out of
-  minimally linear (parallel-only) graphs. ###
-  throw new Error "linearity not implemented for graphs with loners" if graph[ 'loners' ]
-  groups  = @group graph
-  size    = groups.length
-  return 1 if size is 0
-  count   = 0
-  count  += group.length for group in groups
-  minimum = 1 / count
-  shrink  = 1 - minimum
-  return ( ( groups.length / count ) - minimum ) / shrink
-
-graph = LTSORT.new_graph loners: no
-LTSORT.add graph, 'X'
-LTSORT.add graph, 'Y'
-debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
-LTSORT.add graph, 'Z'
-debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
-LTSORT.add graph, 'A', 'B'
-LTSORT.add graph, 'B', 'C'
-info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
-LTSORT.add graph, 'A', 'a'
-info group for group in LTSORT.group graph; debug LTSORT.get_linearity graph; debug @get_linearity.apply LTSORT, [ graph, ]
 
 
 

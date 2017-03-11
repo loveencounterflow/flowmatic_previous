@@ -28,7 +28,7 @@
     "cnd": "^4.2.0",
     "coffeenode-suspend": "^0.1.11",
     "coffeescript": "^2.0.0-alpha1",
-    "ltsort": "^1.2.2",
+    "ltsort": "^1.2.3",
     "pipestreams": "0.0.9",
     "unicode-properties": "^1.1.0",
     "xregexp": "^3.1.1"
