@@ -27,7 +27,7 @@
   "dependencies": {
     "cnd": "^4.2.2",
     "coffeenode-suspend": "^0.1.11",
-    "coffeescript": "^1.12.6",
+    "coffeescript": "^2.0.0-beta2",
     "ltsort": "^1.2.3",
     "pipestreams": "^0.1.1",
     "stupid-coffee-lexer": "^0.7.0",
