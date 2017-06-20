@@ -1,6 +1,6 @@
 {
   "name": "flowmatic",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A CoffeeScript-Based Preparser to build Programming Languages",
   "main": "lib/main.js",
   "scripts": {
