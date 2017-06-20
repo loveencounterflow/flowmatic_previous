@@ -30,6 +30,7 @@
     "coffeescript": "^1.12.6",
     "ltsort": "^1.2.3",
     "pipestreams": "^0.1.1",
+    "stupid-coffee-lexer": "^0.7.0",
     "unicode-properties": "^1.1.0",
     "xregexp": "^3.2.0"
   },

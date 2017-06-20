@@ -72,7 +72,7 @@ HELPERS.transpile_B = ( text, handler ) ->
 #-----------------------------------------------------------------------------------------------------------
 TAP.test "random stuff", ( T ) ->
   Randex  = require 'randexp'
-  randex  = new Randex /[-\x20a-z0-9\/()\[\]§$%^°+*´`=?]{0,150}/
+  randex  = new Randex /[-\x20a-z0-9()\[\]§$%^°+*´`=?]{0,150}/
   step ( resume ) ->
     for i in [ 0 .. 10 ]
       probe = randex.gen()

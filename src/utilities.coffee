@@ -13,7 +13,7 @@ debug                     = CND.get_logger 'debug',     badge
 # help                      = CND.get_logger 'help',      badge
 # urge                      = CND.get_logger 'urge',      badge
 # echo                      = CND.echo.bind CND
-# PS                        = require '../../pipestreams'
+# PS                        = require 'pipestreams'
 # { $, map, }               = PS
 # CS                        = require 'coffeescript'
 
