@@ -1,4 +1,5 @@
 
+( require 'tap' ).test "skip", ( T ) -> T.end()
 
 categories = [
   { name: 'C',   alias: 'Other',                   }

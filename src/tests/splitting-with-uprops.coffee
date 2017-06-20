@@ -6,7 +6,7 @@
 * https://github.com/devongovett/unicode-properties
 
   When implementing many Unicode algorithms such as text segmentation, normalization, bidi processing, etc.,
-  fast access to character metadata is crucial to good performance. There over a million code points in the
+  fast access to character metadata is crucial to good performance. There are over a million code points in the
   Unicode standard, many of which produce the same result when looked up, so an array or hash table is not
   appropriate - those data structures are fast but would require a lot of memory. The data is generally
   grouped in ranges, so you could do a binary search, but that is not fast enough for some applications.
@@ -488,8 +488,13 @@ TAP.test "basic model", ( T ) ->
   #.........................................................................................................
   return null
 
+
 #-----------------------------------------------------------------------------------------------------------
 TAP.test "stress test", ( T ) ->
+  ### TAINT unfinished ###
+  T.end()
+  return null
+  ###
   path = PATH.resolve __dirname, '../../../mingkwai-rack/jizura-datasources/data/flat-files/shape/shape-breakdown-formula.txt'
   pipeline = []
   pipeline.push input   = PS.new_file_source path
@@ -506,6 +511,7 @@ TAP.test "stress test", ( T ) ->
   # pipeline.push PS.$drain()
   output.on 'finish', -> T.end()
   PS.pull pipeline...
+  ###
 
 
 
